@@ -13,8 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -98,6 +99,17 @@ class User extends Authenticatable
                 $model->id = (string) Str::ulid();
             }
         });
+    }
+
+    public function getJWTIdentifier () {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims () : array {
+        return [
+            'email',
+            'role'
+        ];
     }
 
 }
