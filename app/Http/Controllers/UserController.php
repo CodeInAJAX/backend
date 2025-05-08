@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use App\Service\Contracts\UserService;
@@ -75,11 +76,25 @@ class UserController extends Controller
     )]
     public function store(StoreUserRequest $request): JsonResponse
     {
+        $userRegistered = $this->userService->create($request);
         return $this->successResponse([
             'title' => 'Successfully Registered Users',
             'code' => HttpResponse::HTTP_CREATED,
             'status' => 'STATUS_CREATED',
-            'data' => $this->userService->create($request),
+            'data' => $userRegistered,
+        ]);
+    }
+
+    public function login(LoginUserRequest $request): JsonResponse
+    {
+        $dataToken = $this->userService->login($request);
+        $this->userService->setCookieWithRefreshToken($dataToken['refresh_token']);
+        unset($dataToken['refresh_token']);
+        return $this->successResponse([
+            'title' => 'Successfully logged in User',
+            'status' => 'STATUS_OK',
+            'code' =>  200,
+            'data' => $dataToken
         ]);
     }
 
