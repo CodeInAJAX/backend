@@ -12,8 +12,14 @@ use App\Service\Contracts\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Log\Logger;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Knuckles\Scribe\Attributes\Authenticated;
+use Knuckles\Scribe\Attributes\Endpoint;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\Header;
+use Knuckles\Scribe\Attributes\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
+#[Group("Course management", "APIs for managing courses")]
 class CourseController extends Controller implements HasMiddleware
 {
     use HttpResponses;
@@ -25,9 +31,58 @@ class CourseController extends Controller implements HasMiddleware
 
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    #[Endpoint('Get List Courses By Pagination', <<<DESC
+  This endpoint allows you to get list courses by pagination.
+  It's a really useful endpoint, because this endpoint can see all courses by pagination.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            'title' => 'Successfully Get All Courses',
+            'code' => 200,
+            'status' => 'STATUS_OK',
+            'data' => [
+
+            ],
+            'meta' => [
+                'current_page' => 1,
+                'last_page' => 3,
+                'per_page' => 10,
+                'total' => 30,
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users Unauthorized',
+                    'details' => 'You must authenticate to perform this action.',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Courses Retrieval Failed',
+                    'details' => 'Something went wrong. Please try again.',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function index(PaginationRequest $request) : JsonResponse
     {
         try {
@@ -39,7 +94,7 @@ class CourseController extends Controller implements HasMiddleware
                 [
                     'title' => 'Successfully Get All Courses',
                     'code' => 200,
-                    'status' => HttpResponse::HTTP_OK,
+                    'status' => 'STATUS_OK',
                     'data' => $courses->collection,
                     'meta' => [
                         'current_page' => $courses->currentPage(),
