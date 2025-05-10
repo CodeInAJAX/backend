@@ -24,3 +24,7 @@ yarn-error.log
 .git
 commit.sh
 .scribe/*
+
+**/caddy
+frankenphp
+frankenphp-worker.php
