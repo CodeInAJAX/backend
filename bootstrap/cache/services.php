@@ -33,8 +33,9 @@
     29 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     30 => 'Termwind\\Laravel\\TermwindServiceProvider',
     31 => 'Scalar\\ScalarServiceProvider',
-    32 => 'App\\Providers\\AppServiceProvider',
-    33 => 'App\\Providers\\ServicesProvider',
+    32 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+    33 => 'App\\Providers\\AppServiceProvider',
+    34 => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'eager' => 
   array (
@@ -55,7 +56,8 @@
     14 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     15 => 'Termwind\\Laravel\\TermwindServiceProvider',
     16 => 'Scalar\\ScalarServiceProvider',
-    17 => 'App\\Providers\\AppServiceProvider',
+    17 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+    18 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (
@@ -212,7 +214,7 @@
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
-    'App\\Service\\Contracts\\UserService' => 'App\\Providers\\ServicesProvider',
+    'App\\Service\\Contracts\\UserService' => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'when' => 
   array (
@@ -261,7 +263,7 @@
     'Laravel\\Tinker\\TinkerServiceProvider' => 
     array (
     ),
-    'App\\Providers\\ServicesProvider' => 
+    'App\\Providers\\ServicesLayerServiceProvider' => 
     array (
     ),
   ),
