@@ -29,7 +29,7 @@ class CoursePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('mentor');
+        return ($user->hasRole('mentor') || $user->hasRole('admin'));
     }
 
     /**
@@ -37,7 +37,7 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
-        return $user->hasRole('mentor') && $user->id == $course->mentor_id;
+        return ($user->hasRole('mentor') || $user->hasRole('admin')) && $user->id == $course->mentor_id;
     }
 
     /**
@@ -45,7 +45,7 @@ class CoursePolicy
      */
     public function delete(User $user, Course $course): bool
     {
-        return  $user->hasRole('mentor') && $user->id == $course->mentor_id;;
+        return  ($user->hasRole('mentor') || $user->hasRole('admin')) && $user->id == $course->mentor_id;;
     }
 
     /**
