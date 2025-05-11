@@ -4,15 +4,18 @@ namespace App\Service\Implements;
 
 use App\Enums\Gender;
 use App\Enums\Role;
+use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Service\Contracts\UserService;
 use App\Traits\HttpResponses;
+use Illuminate\Cookie\Cookie;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserServiceImpl implements UserService
@@ -86,5 +89,88 @@ class UserServiceImpl implements UserService
     public function delete(string $id): bool
     {
         return true;
+    }
+
+    public function login(LoginUserRequest $data): array
+    {
+        $this->logger->info('starts the process of logging in a user');
+
+        $data->validated();
+
+        $this->logger->info('successfully passed the validation process, then the process of authenticating user');
+
+        $accessToken = Auth::guard('api')->attempt($data->only('email', 'password'));
+
+        if (!$accessToken) {
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Failed logged in User',
+                    'details' => 'Invalid login credentials, email or password is incorrect',
+                    'code' => 401,
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'meta' => [
+                        'value' => [
+                            'email' => $data->get('email'),
+                            'password' => $data->get('password')
+                        ]
+                    ]
+                ]
+            ]));
+        }
+
+        $this->logger->info('successfully passed the process of authenticating user, then the process of create refresh token');
+
+        $refreshToken = $this->createRefreshToken($data->only('email', 'password'));
+
+        if (!$refreshToken) {
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Failed logged in User',
+                    'details' => 'Invalid login credentials, email or password is incorrect',
+                    'code' => 401,
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'meta' => [
+                        'value' => [
+                            'email' => $data->get('email'),
+                            'password' => $data->get('password')
+                        ]
+                    ]
+                ]
+            ]));
+        }
+
+        $this->logger->info('successfully goes through all the subsequent processes returning the result');
+
+        return [
+            'access_token' => $accessToken,
+            'token_type' => 'Bearer',
+            'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
+            'refresh_token' => $refreshToken
+        ];
+    }
+
+    private function createRefreshToken($credential) :string
+    {
+        $refreshTokenTTL = config('jwt.refresh_ttl', 1440);
+        return Auth::guard('api')->claims([
+            'refresh' => true,
+            'exp' => Carbon::now()->addMinutes($refreshTokenTTL)->timestamp
+            ])->setTTL($refreshTokenTTL)->attempt($credential);
+    }
+
+    public function setCookieWithRefreshToken(string $refreshToken) :Cookie
+    {
+        $this->logger->info('starts the process of setting cookie with valur refresh token');
+        return cookie(
+            'refresh_token',
+            $refreshToken,
+            config('jwt.refresh_ttl', 1440),
+            '/',
+            null,                          // Domain (null = current domain)
+            config('app.env') !== 'local', // Secure (true di production)
+            true,                          // HTTP Only
+            false,                         // Raw
+            'Lax'                       // SameSite policy
+        );
     }
 }
