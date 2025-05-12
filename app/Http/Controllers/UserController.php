@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FilterUserByEmailRequest;
 use App\Http\Requests\LoginUserRequest;
-use App\Http\Requests\PaginationUserRequest;
+use App\Http\Requests\PaginationRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UserResource;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Log\Logger;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -24,19 +25,20 @@ use Knuckles\Scribe\Attributes\Endpoint;
 use Knuckles\Scribe\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\JWTGuard;
 
 #[Group("Users management", "APIs for managing user accounts")]
 class UserController extends Controller implements HasMiddleware
 {
     use HttpResponses;
+    protected Guard|StatefulGuard|JWTGuard $authGuard;
     public function __construct(
-        private UserService $userService,
-        protected Logger $logger,
+        private readonly UserService $userService,
+        protected Logger             $logger,
     )
     {
-        $this->userService = $userService;
     }
 
     public static function middleware(): array
@@ -124,7 +126,7 @@ class UserController extends Controller implements HasMiddleware
         status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
         description: 'Internal Server Error'
     )]
-    public function index(PaginationUserRequest $request) : JsonResponse
+    public function index(PaginationRequest $request) : JsonResponse
     {
        try {
            $this->logger->info('receive request for get all users by pagination');
@@ -143,7 +145,9 @@ class UserController extends Controller implements HasMiddleware
                ]
            ]);
        } catch (\Exception $exception) {
-
+           if ( $exception instanceof HttpResponseException ) {
+               throw $exception;
+           }
            $this->logger->error('failed processing request for get all users by pagination',  [
                'error' => $exception->getMessage()
            ]);
@@ -224,6 +228,9 @@ class UserController extends Controller implements HasMiddleware
                 'data' => $userRegistered,
             ]);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
 
             $this->logger->error('failed processing request for register users or create new user',  [
                 'error' => $exception->getMessage()
@@ -303,6 +310,9 @@ class UserController extends Controller implements HasMiddleware
                 'data' => $dataToken
             ])->withCookie($cookie);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for login users to get access token', [
                 'error' => $exception->getMessage()
             ]);
@@ -405,6 +415,9 @@ class UserController extends Controller implements HasMiddleware
                 'data' => $dataToken
             ]);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for refresh token to get access token', [
                 'error' => $exception->getMessage()
             ]);
@@ -488,7 +501,7 @@ class UserController extends Controller implements HasMiddleware
                 'data' => null
             ])->withCookie($cookie);
 
-        } catch (JWTException | TokenInvalidException | AuthenticationException $exception) {
+        } catch (TokenInvalidException | AuthenticationException $exception) {
             $this->logger->error('failed request for logout users to remove refresh token', [
                 'errors' => $exception->getMessage()
             ]);
@@ -513,6 +526,9 @@ class UserController extends Controller implements HasMiddleware
                 ]
             ]));
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for logout users to remove refresh token', [
                 'error' => $exception->getMessage()
             ]);
@@ -593,6 +609,9 @@ class UserController extends Controller implements HasMiddleware
             ]);
 
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for show users to see a user',  [
                 'error' => $exception->getMessage()
             ]);
@@ -675,6 +694,9 @@ class UserController extends Controller implements HasMiddleware
                 'data' => $user,
             ]);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for update user',  [
                'errors' => $exception->getMessage()
             ]);
@@ -744,6 +766,9 @@ class UserController extends Controller implements HasMiddleware
                 'meta' => $meta,
             ]);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for delete user',  [
                 'errors' => $exception->getMessage()
             ]);
@@ -813,10 +838,201 @@ class UserController extends Controller implements HasMiddleware
                 'meta' => $meta,
             ]);
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed request for restore user',  [
                 'errors' => $exception->getMessage()
             ]);
             throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Restore Failed'));
         }
     }
+
+    #[Endpoint('Get List Trash User By Pagination', <<<DESC
+  This endpoint allows you to get trash list user by pagination.
+  It's a really useful endpoint, because this endpoint can see all trash user by pagination.
+ DESC)]
+    #[Authenticated(authenticated: true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            'title' => 'Successfully Retrieved List Trash Users By Pagination',
+            'status' => 'STATUS_OK',
+            'code' => 200,
+            'meta' => [
+                'current_page' => 1,
+                'per_page' => 10,
+                'total_users' => 100,
+                'total_pages' => 10,
+            ],
+            'data' => [
+                [
+                    'id' => '01JTT6XDDMS8WE4WM7...',
+                    'name' => 'johndoe',
+                    'email' => 'johndoe@gmail.com',
+                    'role' => 'student',
+                    'profile' => [
+                        'gender' => 'male',
+                        'about' => 'lorem ipsum',
+                        'photo' => 'http://bailey.com/'
+                    ],
+                    'createdAt' => '2025-05-09T09:44:36.000000Z',
+                    'updatedAt' => '2025-05-09T09:44:36.000000Z'
+                ],
+                [
+                    'id' => '01JTT6XDDMS8WE4WM7...',
+                    'name' => 'foobar',
+                    'email' => 'foobare@gmail.com',
+                    'role' => 'student',
+                    'profile' => [
+                        'gender' => 'male',
+                        'about' => 'lorem ipsum',
+                        'photo' => 'http://bailey.com/'
+                    ],
+                    'createdAt' => '2025-05-09T09:44:36.000000Z',
+                    'updatedAt' => '2025-05-09T09:44:36.000000Z'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users Unauthorized',
+                    'details' => 'You must authenticate to perform this action.',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Get All Trashed User Failed',
+                    'details' => 'Something went wrong. Please try again.',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
+    public function trashAll(PaginationRequest $request) : JsonResponse
+    {
+        try {
+            $this->logger->info('receive request for get all trashed users by pagination');
+
+            $userCollection = $this->userService->getAllTrashed($request);
+            return $this->successResponse([
+                'title' => 'Successfully Retrieved List Trash Users By Pagination',
+                'status' => 'STATUS_OK',
+                'code' => 200,
+                'data' => $userCollection->collection,
+                'meta' => [
+                    'current_page' => $userCollection->currentPage(),
+                    'last_page' => $userCollection->lastPage(),
+                    'per_page' => $userCollection->perPage(),
+                    'total' => $userCollection->total(),
+                ]
+            ]);
+        } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
+            $this->logger->error('failed processing request for get all trashed users by pagination',  [
+                'error' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Get All Trashed Failed'));
+        }
+
+    }
+
+    #[Endpoint('Show Deleted / Trashed User', <<<DESC
+  This endpoint allows you to show a user.
+  It's a really useful endpoint, because this endpoint show a user has been deleted
+ DESC)]
+    #[Authenticated(authenticated: true)]
+    #[Response(
+        content: [
+            'title' => 'Successfully Getting a User',
+            'status' => 'STATUS_OK',
+            'code' => 200,
+            'meta' => null,
+            'data' => [
+                'id' => '01JTT6XDDMS8WE4WM7...',
+                'name' => 'johndoe',
+                'email' => 'johndoe@gmail.com',
+                'role' => 'student',
+                'profile' => [
+                    'gender' => 'male',
+                    'about' => 'lorem ipsum',
+                    'photo' => 'http://bailey.com/'
+                ],
+                'createdAt' => '2025-05-09T09:44:36.000000Z',
+                'updatedAt' => '2025-05-09T09:44:36.000000Z'
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users Unauthorized',
+                    'details' => 'You must authenticate to perform this action.',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Get Trashed User By ID Failed',
+                    'details' => 'Something went wrong. Please try again.',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
+    public function showTrash(string $id): JsonResponse
+    {
+        try {
+            $this->logger->info('receive request for show trashed user');
+
+            $user = $this->userService->showTrash($id);
+
+            return $this->successResponse([
+                'title' => 'Successfully Get Trashed User',
+                'code' => HttpResponse::HTTP_OK,
+                'status' => 'STATUS_OK',
+                'data' => $user,
+            ]);
+        } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
+            $this->logger->error('failed request for show trash user',  [
+                'errors' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Get Trashed User By ID Failed'));
+        }
+    }
+
 }
