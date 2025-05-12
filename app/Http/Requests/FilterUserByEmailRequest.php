@@ -52,4 +52,9 @@ class FilterUserByEmailRequest extends FormRequest
           'email' => $this->route('email'),
         ];
     }
+
+    public function bodyParameters() : array
+    {
+        return [];
+    }
 }
