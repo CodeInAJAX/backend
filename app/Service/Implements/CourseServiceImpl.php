@@ -15,6 +15,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 //use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Log\Logger;
@@ -76,7 +77,11 @@ class CourseServiceImpl implements CourseService
 
             return CourseResource::collection($courses);
         } catch (\Exception $exception) {
+
             $this->logger->error('failed to get all courses: ' . $exception->getMessage());
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             throw new HttpResponseException($this->errorResponse([
                 [
                     'title' => 'Course List Failed',
@@ -114,10 +119,12 @@ class CourseServiceImpl implements CourseService
             if (!$course) {
                 $this->logger->error('failed to show the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
-                    'title' => 'Course Show Failed',
-                    'details' => 'failed to show course: the course not found',
-                    'code' => 404,
-                    'status' => 'STATUS_NOT_FOUND'
+                    [
+                        'title' => 'Course Show Failed',
+                        'details' => 'failed to show course: the course not found',
+                        'code' => 404,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
                 ]));
             }
 
@@ -125,14 +132,14 @@ class CourseServiceImpl implements CourseService
             $this->logger->info('successfully show a course, then return course creation results');
 
             return new CourseResource($course);
-        } catch (\Exception $exception) {
-            $this->logger->error('failed to show the course: ' . $exception->getMessage());
+        } catch (ModelNotFoundException $exception) {
+            $this->logger->error('failed to show the course: course not found ' . $exception->getMessage());
             throw new HttpResponseException($this->errorResponse([
                 [
                     'title' => 'Course Show Failed',
-                    'details' => 'failed to show course: ' . $exception->getMessage(),
-                    'code' => 500,
-                    'status' => 'INTERNAL_SERVER_ERROR'
+                    'details' => 'course not found: ' . $exception->getMessage(),
+                    'code' => 404,
+                    'status' => 'STATUS_NOT_FOUND'
                 ]
             ]));
         }
@@ -222,14 +229,16 @@ class CourseServiceImpl implements CourseService
             ]);
 
             // validate request
-            $course = $this->course->newQuery()->find( $id);
+            $course = $this->course->newQuery()->find($id);
             if (!$course) {
                 $this->logger->error('failed to update the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
-                    'title' => 'Course Update Failed',
-                    'details' => 'failed to update course: the course not found',
-                    'code' => 404,
-                    'status' => 'STATUS_NOT_FOUND'
+                    [
+                        'title' => 'Course Update Failed',
+                        'details' => 'failed to update course: the course not found',
+                        'code' => 404,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
                 ]));
             }
 
@@ -257,8 +266,7 @@ class CourseServiceImpl implements CourseService
             }
 
             $course->save();
-            $course->newModelQuery()->withExists(['mentor','lessons']);
-            $course->refresh();
+            $course = $this->course->newModelQuery()->withExists(['mentor','lessons'])->find($id);
             $this->logger->info('successfully updated a course with updated fields', [
                 'updated_fields' => $updatedFields
             ]);
@@ -277,7 +285,6 @@ class CourseServiceImpl implements CourseService
             ]));
         }
     }
-
     public function delete(string $id): array
     {
         try {
@@ -335,6 +342,9 @@ class CourseServiceImpl implements CourseService
             ];
         } catch (\Exception $exception) {
             $this->logger->error('failed to delete the course: ' . $exception->getMessage());
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             throw new HttpResponseException($this->errorResponse([
                 [
                     'title' => 'Course Delete Failed',
