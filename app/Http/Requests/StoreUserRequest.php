@@ -77,4 +77,8 @@ class StoreUserRequest extends FormRequest
         );
     }
 
+    public function validationData(): array
+    {
+        return $this->only('name','email', 'password', 'role', 'gender', 'about', 'photo');
+    }
 }
