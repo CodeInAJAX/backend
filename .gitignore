@@ -28,3 +28,4 @@ commit.sh
 **/caddy
 frankenphp
 frankenphp-worker.php
+.env.pgsql
