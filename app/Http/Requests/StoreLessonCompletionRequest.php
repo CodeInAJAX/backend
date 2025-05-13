@@ -27,11 +27,6 @@ class StoreLessonCompletionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lesson_id' => [
-                'required',
-                'string',
-                'exists:lessons,id',
-            ],
             'watch_duration' => [
                 'required',
                 'integer',
@@ -50,10 +45,6 @@ class StoreLessonCompletionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'lesson_id.required' => 'ID pelajaran wajib diisi.',
-            'lesson_id.string' => 'ID pelajaran harus berupa teks.',
-            'lesson_id.exists' => 'ID pelajaran tidak ditemukan dalam data.',
-
             'watch_duration.required' => 'Durasi tontonan wajib diisi.',
             'watch_duration.integer' => 'Durasi tontonan harus berupa angka.',
             'watch_duration.min' => 'Durasi tontonan tidak boleh kurang dari 0 detik.',
@@ -62,9 +53,6 @@ class StoreLessonCompletionRequest extends FormRequest
 
 
     public function validationData() :array {
-        return [
-            'lesson_id' => $this->route('id'),
-            'watch_duration' => $this->get('watch_duration'),
-        ];
+        return $this->only('watch_duration');
     }
 }
