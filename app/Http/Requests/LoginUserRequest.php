@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class LoginUserRequest extends FormRequest
 {
@@ -40,11 +41,11 @@ class LoginUserRequest extends FormRequest
                 'required',
                 'string',
                 'min:8',
+                'max:255',
             ],
             'confirm_password' => [
                 'required',
                 'string',
-                'min:8',
                 'same:password',
             ]
         ];
