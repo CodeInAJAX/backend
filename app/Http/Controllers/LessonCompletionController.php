@@ -201,7 +201,7 @@ class LessonCompletionController extends Controller implements HasMiddleware
         status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
         description: 'Internal Server Error'
     )]
-    public function show(string $lessonCompletionId) :JsonResponse
+    public function show( string $lessonId, string $lessonCompletionId) :JsonResponse
     {
         try {
             // Log the method call before execution
@@ -310,7 +310,7 @@ class LessonCompletionController extends Controller implements HasMiddleware
         status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
         description: 'Internal Server Error'
     )]
-    public function update(UpdateLessonCompletionRequest $request, string $lessonCompletionId) :JsonResponse
+    public function update(UpdateLessonCompletionRequest $request, string $lessonId, string $lessonCompletionId) :JsonResponse
     {
         try {
             // Log the method call before execution
@@ -415,7 +415,7 @@ class LessonCompletionController extends Controller implements HasMiddleware
         status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
         description: 'Internal Server Error'
     )]
-    public function destroy(string $lessonCompletionId) :JsonResponse
+    public function destroy( string $lessonId, string $lessonCompletionId) :JsonResponse
     {
         try {
             // Log the method call before execution
