@@ -2,16 +2,20 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\HttpResponses;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRatingRequest extends FormRequest
 {
+    use HttpResponses;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +26,43 @@ class StoreRatingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'rating' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:5',
+            ],
+            'comment' => [
+                'required',
+                'string',
+            ]
         ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'rating.required' => 'Rating wajib diisi.',
+            'rating.integer' => 'Rating harus berupa angka.',
+            'rating.min' => 'Rating minimal adalah 1.',
+            'rating.max' => 'Rating maksimal adalah 5.',
+
+            'comment.required' => 'Komentar wajib diisi.',
+            'comment.string' => 'Komentar harus berupa teks.',
+        ];
+    }
+
+
+    public function validationData(): array
+    {
+        return $this->only('rating', 'comment');
+    }
+
+
+    public function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            $this->errorValidatorToResponse($validator)
+        );
     }
 }
