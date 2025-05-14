@@ -39,17 +39,36 @@ class CourseController extends Controller implements HasMiddleware
     #[Header('Accept', 'application/json')]
     #[Response(
         content: [
-            'title' => 'Successfully Get All Courses',
+            'title' => 'Berhasil mendapatkan semua kursus',
             'code' => 200,
             'status' => 'STATUS_OK',
             'data' => [
-
+                [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ],
+                [
+                    "id" => "01JV2CB3BZN14GFMM6WCAFYY77",
+                    "title" => "Laravel 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:53:23.000000Z",
+                    "updatedAt" => "2025-05-12T13:53:23.000000Z"
+                ]
             ],
             'meta' => [
                 'current_page' => 1,
-                'last_page' => 3,
+                'last_page' => 1,
                 'per_page' => 10,
-                'total' => 30,
+                'total' => 2,
             ]
         ],
         status: HttpResponse::HTTP_OK,
@@ -59,8 +78,8 @@ class CourseController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -73,8 +92,8 @@ class CourseController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Courses Retrieval Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan semua kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -92,7 +111,7 @@ class CourseController extends Controller implements HasMiddleware
 
             return $this->successResponse(
                 [
-                    'title' => 'Successfully Get All Courses',
+                    'title' => 'Berhasil mendapatkan semua kursus',
                     'code' => 200,
                     'status' => 'STATUS_OK',
                     'data' => $courses->collection,
@@ -111,13 +130,66 @@ class CourseController extends Controller implements HasMiddleware
             $this->logger->error('failed processing request for get all courses', [
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Courses Retrieval Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua kursus'));
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[Endpoint('Create new Course', <<<DESC
+  This endpoint allows you to create new course.
+  It's a really useful endpoint, because this endpoint can see create new course.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            [
+                "title" => "Berhasil membuat kursus",
+                "status" => 200,
+                "code" => 200,
+                "meta" => null,
+                "data" => [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_CREATED,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal membuat kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function store(StoreCourseRequest $request) : JsonResponse
     {
         try {
@@ -127,9 +199,9 @@ class CourseController extends Controller implements HasMiddleware
 
             return $this->successResponse(
                 [
-                    'title' => 'Successfully Create Courses',
+                    'title' => 'Berhasil membuat kursus',
                     'code' => 200,
-                    'status' => HttpResponse::HTTP_OK,
+                    'status' => 'STATUS_OK',
                     'data' => $course
                 ]
             );
@@ -140,13 +212,81 @@ class CourseController extends Controller implements HasMiddleware
             $this->logger->error('failed processing request for create course',  [
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Course Create Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal membuat kursus'));
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[Endpoint('Show Course', <<<DESC
+  This endpoint allows you to show course.
+  It's a really useful endpoint, because this endpoint can see show course by id.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            [
+                "title" => "Berhasil mendapatkan kursus",
+                "status" => 200,
+                "code" => 200,
+                "meta" => null,
+                "data" => [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content:    [
+            "errors" => [
+                [
+                    "title" => "Gagal mendapatkan kursus",
+                    "details" => "gagal mendapatkan kursus karena tidak ditemukan",
+                    "status" => "STATUS_NOT_FOUND",
+                    "code" => 404,
+                    "meta" => null
+                ]
+            ]
+        ],
+        status:  HttpResponse::HTTP_NOT_FOUND,
+        description: 'Not Found'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal mendapatkan kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function show(string $id) : JsonResponse
     {
         try {
@@ -160,9 +300,9 @@ class CourseController extends Controller implements HasMiddleware
 
             return $this->successResponse(
                 [
-                    'title' => 'Successfully Show Courses',
+                    'title' => 'Berhasil mendapatkan kursus',
                     'code' => 200,
-                    'status' => HttpResponse::HTTP_OK,
+                    'status' => 'STATUS_OK',
                     'data' => $course
                 ]
             );
@@ -174,13 +314,81 @@ class CourseController extends Controller implements HasMiddleware
                 'course_id' => $id,
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Course Show Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan kursus'));
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    #[Endpoint('Update Course By ID', <<<DESC
+  This endpoint allows you to Update Course by ID.
+  It's a really useful endpoint, because this endpoint can see update course by id.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            [
+                "title" => "Berhasil memperbarui kursus",
+                "status" => 200,
+                "code" => 200,
+                "meta" => null,
+                "data" => [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content:    [
+            "errors" => [
+                [
+                    "title" => "Gagal memperbarui kursus",
+                    "details" => "gagal memperbarui kursus karena tidak ditemukan",
+                    "status" => "STATUS_NOT_FOUND",
+                    "code" => 404,
+                    "meta" => null
+                ]
+            ]
+        ],
+        status:  HttpResponse::HTTP_NOT_FOUND,
+        description: 'Not Found'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal memperbarui kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function update(UpdateCourseRequest $request, string $id) :JsonResponse
     {
         try {
@@ -194,9 +402,9 @@ class CourseController extends Controller implements HasMiddleware
 
             return $this->successResponse(
                 [
-                    'title' => 'Successfully Update Courses',
+                    'title' => 'Berhasil memperbarui kursus',
                     'code' => 200,
-                    'status' => HttpResponse::HTTP_OK,
+                    'status' => 'STATUS_OK',
                     'data' => $course
                 ]
             );
@@ -208,13 +416,75 @@ class CourseController extends Controller implements HasMiddleware
                 'course_id' => $id,
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Course Update Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal memperbarui kursus'));
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[Endpoint('Delete Course By ID', <<<DESC
+  This endpoint allows you to Delete Course by ID.
+  It's a really useful endpoint, because this endpoint can see delete course by id.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            [
+                "title" => "Berhasil menghapus kursus",
+                "status" => "STATUS_OK",
+                "code" => 200,
+                "meta" => [
+                    "deleted_course_id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "mentor_id" => "01JV2C47X62ESH0PR53BWF6C0D"
+                ],
+                "data" => null
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content:    [
+            "errors" => [
+                [
+                    "title" => "Gagal menghapus kursus",
+                    "details" => "gagal menghapus kursus karena tidak ditemukan",
+                    "status" => "STATUS_NOT_FOUND",
+                    "code" => 404,
+                    "meta" => null
+                ]
+            ]
+        ],
+        status:  HttpResponse::HTTP_NOT_FOUND,
+        description: 'Not Found'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal menghapus kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function destroy(string $id) : JsonResponse
     {
         try {
@@ -228,9 +498,9 @@ class CourseController extends Controller implements HasMiddleware
 
             return $this->successResponse(
                 [
-                    'title' => 'Successfully Delete Courses',
+                    'title' => 'Berhasil menghapus kursus',
                     'code' => 200,
-                    'status' => HttpResponse::HTTP_OK,
+                    'status' => 'STATUS_OK',
                     'data' => null,
                     'meta' => $result
                 ]
@@ -243,7 +513,7 @@ class CourseController extends Controller implements HasMiddleware
                 'course_id' => $id,
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Course Delete Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal menghapus kursus'));
         }
     }
 
