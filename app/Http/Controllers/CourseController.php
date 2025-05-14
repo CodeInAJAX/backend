@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\SearchPaginationRequest;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Routing\Controllers\Middleware;
@@ -133,6 +134,110 @@ class CourseController extends Controller implements HasMiddleware
             throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua kursus'));
         }
     }
+
+    #[Endpoint('Get List Courses By Pagination and Search', <<<DESC
+  This endpoint allows you to get list courses by pagination and search.
+  It's a really useful endpoint, because this endpoint can see all courses by pagination and search.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            'title' => 'Berhasil mendapatkan semua kursus berdasarkan pencarian',
+            'code' => 200,
+            'status' => 'STATUS_OK',
+            'data' => [
+                [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ],
+                [
+                    "id" => "01JV2CB3BZN14GFMM6WCAFYY77",
+                    "title" => "Laravel 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:53:23.000000Z",
+                    "updatedAt" => "2025-05-12T13:53:23.000000Z"
+                ]
+            ],
+            'meta' => [
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 10,
+                'total' => 2,
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal mendapatkan semua kursus berdasarkan pencarian',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
+    public function search(SearchPaginationRequest $request) : JsonResponse
+    {
+        try {
+            $this->logger->info('processing request for get all courses by search');
+            $courses = $this->courseService->search($request);
+            $this->logger->info('successfully retrieved all courses by search');
+
+            return $this->successResponse(
+                [
+                    'title' => 'Berhasil mendapatkan semua kursus berdasarkan pencarian',
+                    'code' => 200,
+                    'status' => 'STATUS_OK',
+                    'data' => $courses->collection,
+                    'meta' => [
+                        'current_page' => $courses->currentPage(),
+                        'last_page' => $courses->lastPage(),
+                        'per_page' => $courses->perPage(),
+                        'total' => $courses->total(),
+                    ]
+                ]
+            );
+        } catch (\Exception $exception) {
+            if ($exception instanceof HttpResponseException) {
+                throw $exception;
+            }
+            $this->logger->error('failed processing request for get all courses by search', [
+                'error' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua kursus berdasarkan pencarian'));
+        }
+    }
+
 
     #[Endpoint('Create new Course', <<<DESC
   This endpoint allows you to create new course.
@@ -315,6 +420,108 @@ class CourseController extends Controller implements HasMiddleware
                 'error' => $exception->getMessage()
             ]);
             throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan kursus'));
+        }
+    }
+
+    #[Endpoint('Show Detail Course', <<<DESC
+  This endpoint allows you to show Detail course.
+  It's a really useful endpoint, because this endpoint can see show detail course by id.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            [
+                "title" => "Berhasil mendapatkan detail kursus",
+                "status" => 200,
+                "code" => 200,
+                "meta" => null,
+                "data" => [
+                    "id" => "01JV2C8J558TDHGGGBAFG70EEY",
+                    "title" => "React 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 16,
+                    "currency" => "usd",
+                    "createdAt" => "2025-05-12T13:52:00.000000Z",
+                    "updatedAt" => "2025-05-12T13:52:00.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content:    [
+            "errors" => [
+                [
+                    "title" => "Gagal mendapatkan detail kursus",
+                    "details" => "gagal mendapatkan detail kursus karena tidak ditemukan",
+                    "status" => "STATUS_NOT_FOUND",
+                    "code" => 404,
+                    "meta" => null
+                ]
+            ]
+        ],
+        status:  HttpResponse::HTTP_NOT_FOUND,
+        description: 'Not Found'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal mendapatkan detail kursus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
+    public function detail(string $id) : JsonResponse
+    {
+        try {
+            $this->logger->info('processing request for show detail course', [
+                'course_id' => $id
+            ]);
+            $course = $this->courseService->detail($id);
+            $this->logger->info('successfully retrieved show detail course', [
+                'course_id' => $id
+            ]);
+
+            return $this->successResponse(
+                [
+                    'title' => 'Berhasil mendapatkan detail kursus',
+                    'code' => 200,
+                    'status' => 'STATUS_OK',
+                    'data' => $course
+                ]
+            );
+        } catch (\Exception $exception) {
+            if ($exception instanceof HttpResponseException) {
+                throw $exception;
+            }
+            $this->logger->error('failed processing request for show detail course', [
+                'course_id' => $id,
+                'error' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan detail kursus'));
         }
     }
 
