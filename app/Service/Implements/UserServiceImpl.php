@@ -4,6 +4,7 @@ namespace App\Service\Implements;
 
 use App\Enums\Gender;
 use App\Enums\Role;
+use App\Http\Requests\FilterUserByEmailRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -11,7 +12,10 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Service\Contracts\UserService;
 use App\Traits\HttpResponses;
-use Illuminate\Cookie\Cookie;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
+use \Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Log\Logger;
@@ -149,16 +153,19 @@ class UserServiceImpl implements UserService
         ];
     }
 
-    private function createRefreshToken($credential) :string
+    private function createRefreshToken($credential): string
     {
-        $refreshTokenTTL = config('jwt.refresh_ttl', 1440);
+        // Force the refresh TTL to be an integer
+        $refreshTokenTTL = (int) config('jwt.refresh_ttl', 1440);
+
+        // Make sure we're passing an integer to Carbon and JWT
         return Auth::guard('api')->claims([
             'refresh' => true,
             'exp' => Carbon::now()->addMinutes($refreshTokenTTL)->timestamp
-            ])->setTTL($refreshTokenTTL)->attempt($credential);
+        ])->setTTL($refreshTokenTTL)->attempt($credential);
     }
 
-    public function setCookieWithRefreshToken(string $refreshToken) :Cookie
+    public function setCookieWithRefreshToken(string $refreshToken) : Cookie
     {
         $this->logger->info('starts the process of setting cookie with valur refresh token');
         return cookie(
@@ -172,5 +179,20 @@ class UserServiceImpl implements UserService
             false,                         // Raw
             'Lax'                       // SameSite policy
         );
+    }
+
+    public function getByEmail(FilterUserByEmailRequest $data): UserResource
+    {
+        $this->logger->info('starts the process of getting a user by email');
+        $data->validated();
+
+        $user = $this->user->newQuery()
+            ->with('profile')
+            ->where('email', $data->route('email'))
+            ->firstOrFail();
+
+        $this->logger->info('successfully goes through all the subsequent processes returning the result');
+
+        return new UserResource($user);
     }
 }
