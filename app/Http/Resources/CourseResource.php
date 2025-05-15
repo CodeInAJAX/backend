@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Course;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
-use InvalidArgumentException;
+
 
 class CourseResource extends JsonResource
 {
@@ -34,6 +34,8 @@ class CourseResource extends JsonResource
             'mentor' => new UserResource($this->whenLoaded('mentor')),
             'lessons' => LessonResource::collection($this->whenLoaded('lessons')),
             'payments' => PaymentResource::collection($this->whenLoaded('payments')),
+            'ratingsUsers' => RatingResource::collection($this->whenLoaded('ratingsUsers')),
+            'students' => UserResource::collection($this->whenLoaded('students')),
         ];
     }
 }
