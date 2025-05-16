@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Models\Enrollment;
+use App\Models\Lesson;
 use App\Models\LessonCompletion;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -21,15 +23,20 @@ class LessonCompletionPolicy
      */
     public function view(User $user, LessonCompletion $lessonCompletion): bool
     {
-        return false;
+        $lesson = $lessonCompletion->lesson;
+        return $user->enrolledCourses()
+            ->where('course_id', $lesson->course_id)
+            ->exists();
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user,): bool
+    public function createLessonCompletion(User $user, Lesson $lesson): bool
     {
-        return false;
+        return $user->enrolledCourses()
+            ->where('course_id', $lesson->course_id)
+            ->exists();
     }
 
     /**
@@ -37,7 +44,10 @@ class LessonCompletionPolicy
      */
     public function update(User $user, LessonCompletion $lessonCompletion): bool
     {
-        return false;
+        $lesson = $lessonCompletion->lesson;
+        return $user->enrolledCourses()
+            ->where('course_id', $lesson->course_id)
+            ->exists();
     }
 
     /**
@@ -45,7 +55,10 @@ class LessonCompletionPolicy
      */
     public function delete(User $user, LessonCompletion $lessonCompletion): bool
     {
-        return false;
+        $lesson = $lessonCompletion->lesson;
+        return $user->enrolledCourses()
+            ->where('course_id', $lesson->course_id)
+            ->exists();
     }
 
     /**
