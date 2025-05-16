@@ -12,8 +12,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Log\Logger;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Symfony\Component\HttpFoundation\Response;
+use Knuckles\Scribe\Attributes\Authenticated;
+use Knuckles\Scribe\Attributes\Endpoint;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\Header;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Knuckles\Scribe\Attributes\Response;
 
+#[Group("Payment Management", "APIs for managing payments")]
 class PaymentController extends Controller implements HasMiddleware
 {
     use HttpResponses;
@@ -25,12 +31,79 @@ class PaymentController extends Controller implements HasMiddleware
 
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param PaginationRequest $request
-     * @return JsonResponse
-     */
+    #[Endpoint('Get List Payments By Pagination', <<<DESC
+  This endpoint allows you to get list payments by pagination.
+  It's a really useful endpoint, because this endpoint can see all payments by pagination.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content:
+        [
+            "title" => "Berhasil mendapatkan semua pembayaran berdasarkan penomoran halaman",
+            "status" => "STATUS_OK",
+            "code" => 200,
+            "meta" => [
+                "current_page" => 1,
+                "last_page" => 1,
+                "per_page" => 10,
+                "total" => 1
+            ],
+            "data" => [
+                [
+                    "id" => "01JV4V34JWQM8NQBJ23W68PVT4",
+                    "userId" => "01JV4V07XVQPNJCW8TFCQ2JMV5",
+                    "courseId" => "01JV4TVS0KSPNQ149H2C2ZCA8A",
+                    "amount" => 50000,
+                    "currency" => "idr",
+                    "paymentMethod" => "cash",
+                    "status" => "success",
+                    "createdAt" => "2025-05-13T12:49:39.000000Z",
+                    "updatedAt" => "2025-05-13T13:15:33.000000Z",
+                    "course" => [
+                        "id" => "01JV4TVS0KSPNQ149H2C2ZCA8A",
+                        "title" => "Laravel 12",
+                        "thumbnail" => "http://bailey.com/",
+                        "description" => "Kursus Framework PHP Yang Populer dan Banyak digunakan Yaitu Laravel, Apalagi versi terbaru nya yaitu 12",
+                        "price" => 50000,
+                        "currency" => "idr",
+                        "createdAt" => "2025-05-13T12:45:38.000000Z",
+                        "updatedAt" => "2025-05-13T12:45:38.000000Z"
+                    ]
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal mendapatkan semua pembayaran berdasarkan penomoran halaman',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function index(PaginationRequest $request): JsonResponse
     {
         try {
@@ -42,7 +115,7 @@ class PaymentController extends Controller implements HasMiddleware
             $payments = $this->paymentService->index($request);
             return $this->successResponse([
                 'title' => 'Berhasil mendapatkan semua pembayaran berdasarkan penomoran halaman',
-                'code' => Response::HTTP_OK,
+                'code' => HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => $payments->collection,
                 'meta' => [
@@ -65,12 +138,61 @@ class PaymentController extends Controller implements HasMiddleware
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param StorePaymentRequest $request
-     * @return JsonResponse
-     */
+    #[Endpoint('Create new Payments', <<<DESC
+  This endpoint allows you to create new payments and auto create enrollments.
+  It's a really useful endpoint, because this endpoint can create new payments.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            "title" => "Berhasil menambahkan pembayaran baru",
+            "status" => "STATUS_CREATED",
+            "code" => 201,
+            "meta" => null,
+            "data" => [
+                "id" => "01JV4V34JWQM8NQBJ23W68PVT4",
+                "userId" => "01JV4V07XVQPNJCW8TFCQ2JMV5",
+                "courseId" => "01JV4TVS0KSPNQ149H2C2ZCA8A",
+                "amount" => 50000,
+                "currency" => "idr",
+                "paymentMethod" => "cash",
+                "status" => "pending",
+                "createdAt" => "2025-05-13T12:49:39.000000Z",
+                "updatedAt" => "2025-05-13T12:49:39.000000Z"
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal menambahkan pembayaran baru',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function store(StorePaymentRequest $request): JsonResponse
     {
         try {
@@ -88,7 +210,7 @@ class PaymentController extends Controller implements HasMiddleware
 
             return $this->successResponse([
                 'title' => 'Berhasil menambahkan pembayaran baru',
-                'code' =>  Response::HTTP_CREATED,
+                'code' =>  HttpResponse::HTTP_CREATED,
                 'status' => 'STATUS_CREATED',
                 'data' => $payment,
             ]);
@@ -106,12 +228,84 @@ class PaymentController extends Controller implements HasMiddleware
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param string $id
-     * @return JsonResponse
-     */
+    #[Endpoint('Show Detail Payments', <<<DESC
+  This endpoint allows you to show payment details.
+  It's a really useful endpoint, because this endpoint can see payment details.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content:[
+            "title" => "Berhasil mendapatkan detail pembayaran",
+            "status" => "STATUS_OK",
+            "code" => 200,
+            "meta" => null,
+            "data" => [
+                "id" => "01JV4V34JWQM8NQBJ23W68PVT4",
+                "userId" => "01JV4V07XVQPNJCW8TFCQ2JMV5",
+                "courseId" => "01JV4TVS0KSPNQ149H2C2ZCA8A",
+                "amount" => 50000,
+                "currency" => "idr",
+                "paymentMethod" => "cash",
+                "status" => "success",
+                "createdAt" => "2025-05-13T12:49:39.000000Z",
+                "updatedAt" => "2025-05-13T13:15:33.000000Z",
+                "user" => [
+                    "id" => "01JV4V07XVQPNJCW8TFCQ2JMV5",
+                    "name" => "pelajar",
+                    "email" => "pelajar@gmail.com",
+                    "role" => "student",
+                    "profile" => [
+                        "gender" => "male",
+                        "about" => "architecto",
+                        "photo" => "http://bailey.com/"
+                    ],
+                    "createdAt" => "2025-05-13T12:48:05.000000Z",
+                    "updatedAt" => "2025-05-13T12:48:05.000000Z"
+                ],
+                "course" => [
+                    "id" => "01JV4TVS0KSPNQ149H2C2ZCA8A",
+                    "title" => "Laravel 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Kursus Framework PHP Yang Populer dan Banyak digunakan Yaitu Laravel, Apalagi versi terbaru nya yaitu 12",
+                    "price" => 50000,
+                    "currency" => "idr",
+                    "createdAt" => "2025-05-13T12:45:38.000000Z",
+                    "updatedAt" => "2025-05-13T12:45:38.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal mendapatkan detail pembayaran',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function show(string $id): JsonResponse
     {
         try {
@@ -124,7 +318,7 @@ class PaymentController extends Controller implements HasMiddleware
 
             return $this->successResponse([
                 'title' => 'Berhasil mendapatkan detail pembayaran',
-                'code' =>  Response::HTTP_OK,
+                'code' =>  HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => $payment,
             ]);
@@ -142,13 +336,72 @@ class PaymentController extends Controller implements HasMiddleware
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdatePaymentRequest $request
-     * @param string $id
-     * @return JsonResponse
-     */
+
+    #[Endpoint('Update Payments By ID', <<<DESC
+  This endpoint allows you to update payments by id.
+  It's a really useful endpoint, because this endpoint can edit payments by id.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content:  [
+            "title" => "Berhasil memperbarui pembayaran",
+            "status" => "STATUS_OK",
+            "code" => 200,
+            "meta" => null,
+            "data" => [
+                "id" => "01JV6DHQX986GBVJ1TASQRN772",
+                "userId" => "01JV6DEXCJX7R0XRAZ08BC00T5",
+                "courseId" => "01JV6DBAW1JQR7P11TZETWKB63",
+                "amount" => 50000,
+                "currency" => "IDR",
+                "paymentMethod" => "cash",
+                "status" => "success",
+                "createdAt" => "2025-05-14T03:31:27.000000Z",
+                "updatedAt" => "2025-05-14T03:32:53.000000Z",
+                "course" => [
+                    "id" => "01JV6DBAW1JQR7P11TZETWKB63",
+                    "title" => "Laravel 12",
+                    "thumbnail" => "http://bailey.com/",
+                    "description" => "Eius et animi quos velit et.",
+                    "price" => 50000,
+                    "currency" => "IDR",
+                    "createdAt" => "2025-05-14T03:27:57.000000Z",
+                    "updatedAt" => "2025-05-14T03:27:57.000000Z"
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal memperbarui pembayaran',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function update(UpdatePaymentRequest $request, string $id): JsonResponse
     {
         try {
@@ -167,7 +420,7 @@ class PaymentController extends Controller implements HasMiddleware
 
             return $this->successResponse([
                 'title' => 'Berhasil memperbarui pembayaran',
-                'code' =>  Response::HTTP_OK,
+                'code' =>  HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => $payment,
             ]);
@@ -186,12 +439,55 @@ class PaymentController extends Controller implements HasMiddleware
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param string $id
-     * @return JsonResponse
-     */
+        #[Endpoint('Delete Payments By ID', <<<DESC
+  This endpoint allows you to delete payments by ID.
+  It's a really useful endpoint, because this endpoint can delete payments by ID.
+ DESC)]
+    #[Authenticated(true)]
+    #[Header('Accept', 'application/json')]
+    #[Response(
+        content: [
+            "title" => "Berhasil menghapus pendaftaran kursus",
+            "status" => "STATUS_OK",
+            "code" => 200,
+            "meta" => [
+                "user_id" => "01JV4V07XVQPNJCW8TFCQ2JMV5",
+                "enrollment_id" => "01JV4Y4ECPBFPX9DNN41AZB5BQ",
+                "payment_id" => "01JV4Y4EC5WVV9728MGBXZE717"
+            ],
+            "data" => null
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal menghapus pembayaran',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -209,7 +505,7 @@ class PaymentController extends Controller implements HasMiddleware
 
             return $this->successResponse([
                 'title' => 'Berhasil menghapus pembayaran',
-                'code' =>  Response::HTTP_OK,
+                'code' =>  HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => null,
                 'meta' => $result,
