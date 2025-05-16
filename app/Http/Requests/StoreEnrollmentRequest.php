@@ -18,7 +18,19 @@ class StoreEnrollmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user('api')->hasRole('student');
+    }
+
+    public function failedAuthorization()
+    {
+        throw new HttpResponseException($this->errorResponse([
+            [
+                'title' => 'User tidak diizinkan untuk melakukan permintaan',
+                'details' => 'Hanya user berperan siswa yang dapat melakukan permintaan',
+                'code' => 403,
+                'status' => 'STATUS_FORBIDDEN',
+            ]
+        ]));
     }
 
     /**
@@ -33,6 +45,9 @@ class StoreEnrollmentRequest extends FormRequest
                 'required',
                 'string',
                 'exists:courses,id',
+                Rule::unique('enrollments', 'course_id')->where(function ($query) {
+                    return $query->where('student_id', $this->user('api')->id);
+                })
             ]
         ];
     }
@@ -42,7 +57,7 @@ class StoreEnrollmentRequest extends FormRequest
             'course_id.required' => 'ID Kursus harus diisi',
             'course_id.string' => 'ID Kursus tidak valid',
             'course_id.exists' => 'ID Kursus tidak ditemukan',
-
+            'course_id.unique' => 'ID Kursus sudah di berada di pendaftaran kursus',
         ];
     }
 
