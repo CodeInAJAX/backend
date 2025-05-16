@@ -47,6 +47,24 @@ class LoginUserRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.exists' => 'Email tidak terdaftar.',
+
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.string' => 'Kata sandi harus berupa teks.',
+            'password.min' => 'Kata sandi minimal terdiri dari :min karakter.',
+            'password.max' => 'Kata sandi maksimal terdiri dari :max karakter.',
+
+            'confirm_password.required' => 'Konfirmasi kata sandi wajib diisi.',
+            'confirm_password.string' => 'Konfirmasi kata sandi harus berupa teks.',
+            'confirm_password.same' => 'Konfirmasi kata sandi harus sama dengan kata sandi.',
+        ];
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
