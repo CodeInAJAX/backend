@@ -55,7 +55,10 @@ class StoreLessonRequest extends FormRequest
             ],
             'order_number' => [
                 'required',
-                'integer'
+                'integer',
+                Rule::unique('lessons', 'order_number')->where(function ($query) {
+                    return $query->where('course_id', $this->route('courseId'));
+                })
             ]
         ];
     }
@@ -79,6 +82,7 @@ class StoreLessonRequest extends FormRequest
 
             'order_number.required' => 'Nomor urutan wajib diisi.',
             'order_number.integer' => 'Nomor urutan harus berupa angka.',
+            'order_number.unique' => 'Nomor urutan sudah terpakai.',
         ];
     }
 
