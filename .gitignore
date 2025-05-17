@@ -29,3 +29,5 @@ commit.sh
 frankenphp
 frankenphp-worker.php
 .env.pgsql
+.env.minio
+credentials.json
