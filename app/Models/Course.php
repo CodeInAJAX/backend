@@ -49,7 +49,7 @@ class Course extends Model
 
     public function ratingsUsers() : BelongsToMany
     {
-        return $this->belongsToMany(Course::class, 'ratings', 'student_id', 'course_id')
+        return $this->belongsToMany(User::class, 'ratings', 'course_id', 'user_id')
             ->withTimestamps()
             ->withPivot('rating', 'comment');
     }
