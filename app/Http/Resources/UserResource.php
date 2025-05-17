@@ -25,11 +25,21 @@ class UserResource extends JsonResource
 
     public static function collection($resource): AnonymousResourceCollection
     {
-        if (! $resource instanceof Collection || $resource->first() instanceof User) {
-            return parent::collection($resource);
+        if (method_exists($resource, 'getCollection')) {
+            $items = $resource->getCollection(); // untuk paginator
+        } elseif ($resource instanceof \Traversable || is_array($resource)) {
+            $items = $resource;
+        } else {
+            throw new InvalidArgumentException('Invalid resource collection');
         }
 
-        throw new InvalidArgumentException('UserResource::collection only accepts instances of ' . User::class);
+        foreach ($items as $item) {
+            if (! $item instanceof User) {
+                throw new InvalidArgumentException('UserResource::collection only accepts instances of ' . User::class);
+            }
+        }
+
+        return parent::collection($resource);
     }
 
 
