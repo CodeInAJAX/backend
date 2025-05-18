@@ -38,10 +38,10 @@ class Rating extends Model
     }
 
     public function user() : BelongsTo {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function course() : BelongsTo {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'course_id');
     }
 }
