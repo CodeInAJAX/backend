@@ -21,7 +21,7 @@ class CoursePolicy
      */
     public function view(User $user, Course $course): bool
     {
-        return false;
+        return ($user->hasRole('mentor') || $user->hasRole('admin')) && $user->id == $course->mentor_id;
     }
 
     /**
