@@ -57,7 +57,7 @@ class UserController extends Controller implements HasMiddleware
     #[Header('Accept', 'application/json')]
     #[Response(
         content: [
-            'title' => 'Successfully Retrieved List Users By Pagination',
+            'title' => 'Berhasil mendapatkan semua user berdasarkan penomoran halaman',
             'status' => 'STATUS_OK',
             'code' => 200,
             'meta' => [
@@ -102,8 +102,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'User tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -116,8 +116,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Get All Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan semua user berdasarkan penomoran halaman',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -133,7 +133,7 @@ class UserController extends Controller implements HasMiddleware
 
            $userCollection = $this->userService->getAll($request);
             return $this->successResponse([
-               'title' => 'Successfully Retrieved List Users By Pagination',
+               'title' => 'Berhasil mendapatkan semua user berdasarkan penomoran halaman',
                'status' => 'STATUS_OK',
                'code' => 200,
                'data' => $userCollection->collection,
@@ -151,7 +151,7 @@ class UserController extends Controller implements HasMiddleware
            $this->logger->error('failed processing request for get all users by pagination',  [
                'error' => $exception->getMessage()
            ]);
-           throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Get All Failed'));
+           throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua user berdasarkan penomoran halaman'));
        }
     }
 
@@ -162,7 +162,7 @@ class UserController extends Controller implements HasMiddleware
  DESC)]
     #[Response(
         content: [
-            'title' => 'Successfully Registered Users',
+            'title' => 'Berhasil mendaftarkan user baru',
             'code' => 201,
             'status' => 'STATUS_CREATED',
             'data' => [
@@ -186,9 +186,9 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Request Validation Failed',
+                    'title' => 'Gagal mengvalidasi permintaan',
                     'details' => [
-                        'The email has already been taken.'
+                        'Email sudah digunakan.'
                     ],
                     'code' => 400,
                     'status' => 'STATUS_BAD_REQUEST'
@@ -202,8 +202,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Registration Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendaftarkan user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -222,7 +222,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->info('successfully processing request for register users or create new user');
 
             return $this->successResponse([
-                'title' => 'Successfully Registered Users',
+                'title' => 'Berhasil mendaftarkan user baru',
                 'code' => HttpResponse::HTTP_CREATED,
                 'status' => 'STATUS_CREATED',
                 'data' => $userRegistered,
@@ -236,7 +236,7 @@ class UserController extends Controller implements HasMiddleware
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Registration Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendaftarkan user'));
         }
     }
 
@@ -247,7 +247,7 @@ class UserController extends Controller implements HasMiddleware
     #[Response(
         content: [
             [
-                'title' => 'Successfully logged in User',
+                'title' => 'Berhasil login user',
                 'status' => 'STATUS_OK',
                 'code' => 200,
                 'meta' => null,
@@ -265,9 +265,9 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Request Validation Failed',
+                    'title' => 'Gagal mengvalidasi permintaan',
                     'details' => [
-                        'The confirm password field is required.'
+                        'Konfirmasi kata sandi wajib diisi'
                     ],
                     'code' => 400,
                     'status' => 'STATUS_BAD_REQUEST'
@@ -281,8 +281,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Login Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal login user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -304,7 +304,7 @@ class UserController extends Controller implements HasMiddleware
 
 
             return $this->successResponse([
-                'title' => 'Successfully logged in User',
+                'title' => 'Berhasil login user',
                 'status' => 'STATUS_OK',
                 'code' =>  200,
                 'data' => $dataToken
@@ -317,7 +317,7 @@ class UserController extends Controller implements HasMiddleware
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Login Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal login user'));
         }
     }
 
@@ -328,7 +328,7 @@ class UserController extends Controller implements HasMiddleware
     #[Response(
         content: [
             [
-                'title' => 'Successfully Refreshed Token',
+                'title' => 'Berhasil menyegarkan token',
                 'status' => 'STATUS_OK',
                 'code' => 200,
                 'meta' => null,
@@ -346,8 +346,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'refresh token value not provided in cookie',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => "'refresh_token' tidak tersedia di cookie, tolong coba lagi",
                     'code' => 400,
                     'status' => 'STATUS_BAD_REQUEST',
                 ]
@@ -360,8 +360,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'invalid credentials refresh token value',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => "tidak valid nilai dari kredensial 'refresh_token'",
                     'code' => 401,
                     'status' => 'STATUS_UNAUTHORIZED',
                 ]
@@ -374,8 +374,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'Your refresh token must be no expired to perform this action. You can update the refresh token by login again',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => "'refresh_token' anda sudah kadaluarsa. anda dapat mendapatkan yang baru di login",
                     'code' => 403,
                     'status' => 'STATUS_FORBIDDEN',
                 ]
@@ -388,8 +388,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -409,7 +409,7 @@ class UserController extends Controller implements HasMiddleware
 
 
             return $this->successResponse([
-                'title' => 'Successfully Refreshed token',
+                'title' => 'Berhasil menyegarkan token',
                 'status' => 'STATUS_OK',
                 'code' =>  200,
                 'data' => $dataToken
@@ -422,7 +422,7 @@ class UserController extends Controller implements HasMiddleware
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Refresh Token Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Berhasil menyegarkan token'));
         }
     }
 
@@ -433,7 +433,7 @@ class UserController extends Controller implements HasMiddleware
     #[Authenticated(authenticated: true)]
     #[Response(
         content:  [
-            "title" => "Successfully logged out User",
+            "title" => "Berhasil mengeluarkan akun user",
             "status" => "STATUS_OK",
             "code" => 200,
             "meta" => null,
@@ -446,8 +446,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Logout Failed',
-                    'details' => 'Your token must be refresh to perform this action.',
+                    'title' => 'Gagal mengeluarkan akun user',
+                    'details' => 'Token anda sudah kadaluarsa, anda dapat menyegarkan kembali',
                     'status' => 'STATUS_FORBIDDEN',
                     'code' => 403,
                     'meta' => null
@@ -460,8 +460,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Logout Failed',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Gagal mengeluarkan akun user',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -474,8 +474,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Logout Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mengeluarkan akun user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -495,7 +495,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->info('successfully request for logout users to remove refresh token');
 
             return $this->successResponse([
-                'title' => 'Successfully logged out User',
+                'title' => 'Berhasil mengeluarkan akun user',
                 'status' => 'STATUS_OK',
                 'code' =>  200,
                 'data' => null
@@ -507,8 +507,8 @@ class UserController extends Controller implements HasMiddleware
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Logout Failed',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Gagal mengeluarkan akun user',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'code' => HttpResponse::HTTP_UNAUTHORIZED,
                     'status' => 'STATUS_UNAUTHORIZED',
                 ]
@@ -519,8 +519,8 @@ class UserController extends Controller implements HasMiddleware
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Logout Failed',
-                    'details' => 'Your token must be refresh to perform this action.',
+                    'title' => 'Gagal mengeluarkan akun user',
+                    'details' => 'Token anda sudah kadaluarsa, anda dapat menyegarkan kembali',
                     'code' => HttpResponse::HTTP_FORBIDDEN,
                     'status' => 'STATUS_FORBIDDEN',
                 ]
@@ -532,7 +532,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for logout users to remove refresh token', [
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Logout Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mengeluarkan akun user'));
         }
     }
 
@@ -543,7 +543,7 @@ class UserController extends Controller implements HasMiddleware
     #[Authenticated(authenticated: true)]
     #[Response(
         content: [
-            'title' => 'Successfully Getting a User',
+            'title' => 'Berhasil mendapatkan user berdasarkan email',
             'status' => 'STATUS_OK',
             'code' => 200,
             'meta' => null,
@@ -568,8 +568,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -582,8 +582,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Get By Email Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan user berdasarkan email',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -602,7 +602,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->info('successfully request for show users to see a user');
 
             return $this->successResponse([
-                'title' => 'Successfully Getting a User',
+                'title' => 'Berhasil mendapatkan user berdasarkan email',
                 'code' => HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => $user,
@@ -615,23 +615,18 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for show users to see a user',  [
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Get By Email Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan user berdasarkan email'));
         }
     }
 
-    public function home()
-    {
-
-    }
-
-    #[Endpoint('Update a User By Authentication', <<<DESC
-  This endpoint allows you to update a user by authentication.
-  It's a really useful endpoint, because this endpoint can update data user
+    #[Endpoint('Get a Detail User By Authentication', <<<DESC
+  This endpoint allows you to get user by authentication.
+  It's a really useful endpoint, because this endpoint can see other user by authentication
  DESC)]
     #[Authenticated(authenticated: true)]
     #[Response(
         content: [
-            'title' => 'Successfully Updated a User',
+            'title' => 'Berhasil mendapatkan detail user',
             'status' => 'STATUS_OK',
             'code' => 200,
             'meta' => null,
@@ -656,8 +651,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -670,8 +665,91 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Update Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan detail user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
+                    'code' => 500,
+                    'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                ]
+            ]
+        ],
+        status: HttpResponse::HTTP_INTERNAL_SERVER_ERROR,
+        description: 'Internal Server Error'
+    )]
+    public function detail() :JsonResponse
+    {
+        try {
+            $this->logger->info('receive request for show users to see a detail user');
+
+            $user = $this->userService->show();
+
+            $this->logger->info('successfully request for show users to see a detail user');
+
+            return $this->successResponse([
+                'title' => 'Berhasil mendapatkan detail user',
+                'code' => HttpResponse::HTTP_OK,
+                'status' => 'STATUS_OK',
+                'data' => $user,
+            ]);
+
+        } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
+            $this->logger->error('failed request for show detail a user',  [
+                'error' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan detail user'));
+        }
+    }
+
+    #[Endpoint('Update a User By Authentication', <<<DESC
+  This endpoint allows you to update a user by authentication.
+  It's a really useful endpoint, because this endpoint can update data user
+ DESC)]
+    #[Authenticated(authenticated: true)]
+    #[Response(
+        content: [
+            'title' => 'Berhasil memperbarui user',
+            'status' => 'STATUS_OK',
+            'code' => 200,
+            'meta' => null,
+            'data' => [
+                'id' => '01JTT6XDDMS8WE4WM7...',
+                'name' => 'johndoe',
+                'email' => 'johndoe@gmail.com',
+                'role' => 'student',
+                'profile' => [
+                    'gender' => 'male',
+                    'about' => 'lorem ipsum',
+                    'photo' => 'http://bailey.com/'
+                ],
+                'createdAt' => '2025-05-09T09:44:36.000000Z',
+                'updatedAt' => '2025-05-09T09:44:36.000000Z'
+            ]
+        ],
+        status: HttpResponse::HTTP_OK,
+        description: 'Successfully'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'User tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
+                    'status' => 'STATUS_UNAUTHORIZED',
+                    'code' => 401,
+                    'meta' => null
+                ]
+            ]
+        ],status:  HttpResponse::HTTP_UNAUTHORIZED,
+        description: 'Unauthorized'
+    )]
+    #[Response(
+        content: [
+            'errors' => [
+                [
+                    'title' => 'Gagal memperbarui user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -688,7 +766,7 @@ class UserController extends Controller implements HasMiddleware
             $user = $this->userService->update($request);
 
             return $this->successResponse([
-               'title' => 'Successfully Updated a User',
+               'title' => 'Berhasil memperbarui user',
                'code' => HttpResponse::HTTP_OK,
                'status' => 'STATUS_OK',
                 'data' => $user,
@@ -700,7 +778,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for update user',  [
                'errors' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Update Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal memperbarui user'));
         }
     }
 
@@ -711,7 +789,7 @@ class UserController extends Controller implements HasMiddleware
     #[Authenticated(authenticated: true)]
     #[Response(
         content:  [
-            "title" => "Successfully Delete a User",
+            "title" => "Berhasil menghapus user",
             "status" => "STATUS_OK",
             "code" => 200,
             "meta" => [
@@ -727,8 +805,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -741,8 +819,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Delete Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal menghapus user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -759,7 +837,7 @@ class UserController extends Controller implements HasMiddleware
             $meta = $this->userService->delete($id);
 
             return $this->successResponse([
-                'title' => 'Successfully Delete a User',
+                'title' => 'Berhasil menghapus user',
                 'code' => HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => null,
@@ -772,7 +850,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for delete user',  [
                 'errors' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Delete Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal menghapus user'));
         }
     }
 
@@ -783,7 +861,7 @@ class UserController extends Controller implements HasMiddleware
     #[Authenticated(authenticated: true)]
     #[Response(
         content:  [
-            "title" => "Successfully Restore a User",
+            "title" => "Berhasil mengembalikan user",
             "status" => "STATUS_OK",
             "code" => 200,
             "meta" => [
@@ -799,8 +877,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -813,8 +891,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'User Restore Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mengembalikan user',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -831,7 +909,7 @@ class UserController extends Controller implements HasMiddleware
             $meta = $this->userService->restore($id);
 
             return $this->successResponse([
-                'title' => 'Successfully Restore a User',
+                'title' => 'Berhasil mengembalikan user',
                 'code' => HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => null,
@@ -844,7 +922,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for restore user',  [
                 'errors' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Restore Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mengembalikan user'));
         }
     }
 
@@ -856,7 +934,7 @@ class UserController extends Controller implements HasMiddleware
     #[Header('Accept', 'application/json')]
     #[Response(
         content: [
-            'title' => 'Successfully Retrieved List Trash Users By Pagination',
+            'title' => 'Berhasil mendapatkan semua user yang terhapus',
             'status' => 'STATUS_OK',
             'code' => 200,
             'meta' => [
@@ -901,8 +979,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -915,8 +993,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Get All Trashed User Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan semua user yang terhapus',
+                    'details' => 'Sesuatu ada yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -932,7 +1010,7 @@ class UserController extends Controller implements HasMiddleware
 
             $userCollection = $this->userService->getAllTrashed($request);
             return $this->successResponse([
-                'title' => 'Successfully Retrieved List Trash Users By Pagination',
+                'title' => 'Berhasil mendapatkan semua user yang terhapus',
                 'status' => 'STATUS_OK',
                 'code' => 200,
                 'data' => $userCollection->collection,
@@ -950,7 +1028,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed processing request for get all trashed users by pagination',  [
                 'error' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Get All Trashed Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua user yang terhapus'));
         }
 
     }
@@ -962,7 +1040,7 @@ class UserController extends Controller implements HasMiddleware
     #[Authenticated(authenticated: true)]
     #[Response(
         content: [
-            'title' => 'Successfully Getting a User',
+            'title' => 'Berhasil mendapatkan user yang terhapus',
             'status' => 'STATUS_OK',
             'code' => 200,
             'meta' => null,
@@ -987,8 +1065,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Users Unauthorized',
-                    'details' => 'You must authenticate to perform this action.',
+                    'title' => 'Users tidak terautentikasi',
+                    'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                     'status' => 'STATUS_UNAUTHORIZED',
                     'code' => 401,
                     'meta' => null
@@ -1001,8 +1079,8 @@ class UserController extends Controller implements HasMiddleware
         content: [
             'errors' => [
                 [
-                    'title' => 'Get Trashed User By ID Failed',
-                    'details' => 'Something went wrong. Please try again.',
+                    'title' => 'Gagal mendapatkan user yang terhapus',
+                    'details' => 'Sesuatu ada  yang salah, tolong coba lagi',
                     'code' => 500,
                     'status' => 'STATUS_INTERNAL_SERVER_ERROR'
                 ]
@@ -1019,7 +1097,7 @@ class UserController extends Controller implements HasMiddleware
             $user = $this->userService->showTrash($id);
 
             return $this->successResponse([
-                'title' => 'Successfully Get Trashed User',
+                'title' => 'Berhasil mendapatkan user yang terhapus',
                 'code' => HttpResponse::HTTP_OK,
                 'status' => 'STATUS_OK',
                 'data' => $user,
@@ -1031,7 +1109,7 @@ class UserController extends Controller implements HasMiddleware
             $this->logger->error('failed request for show trash user',  [
                 'errors' => $exception->getMessage()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Get Trashed User By ID Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan user yang terhapus'));
         }
     }
 
