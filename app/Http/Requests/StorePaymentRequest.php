@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\PaymentMethod;
-use App\Enums\StatusPayment;
 use App\Traits\HttpResponses;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,7 +17,21 @@ class StorePaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user('api')->hasRole('student');
+    }
+
+    public function failedAuthorization()
+    {
+        throw new HttpResponseException(
+            $this->errorResponse([
+                [
+                    'title' => 'User tidak diizinkan melakukan permintaan pembuatan pembayaran',
+                    'details' => 'Hanya user berperan siswa yang dapat melakukan permintaan pembuatan pembayaran',
+                    'code' => 403,
+                    'status' => 'STATUS_FORBIDDEN',
+                ]
+            ])
+        );
     }
 
     public function failedValidation(Validator $validator)
@@ -39,6 +52,9 @@ class StorePaymentRequest extends FormRequest
               'required',
               'string',
               'exists:courses,id',
+                Rule::unique('payments', 'course_id')->where(function ($query) {
+                    return $query->where('user_id', $this->user('api')->id);
+                })
             ],
             'amount' => [
                 'required',
@@ -62,6 +78,7 @@ class StorePaymentRequest extends FormRequest
             'course_id.required' => 'ID Kursus harus diisi',
             'course_id.string' => 'ID Kursus tidak valid',
             'course_id.exists' => 'ID Kursus tidak ditemukan',
+            'course_id.unique' => 'ID Kursus sudah di bayar',
 
             'amount.required' => 'Jumlah pembayaran harus diisi.',
             'amount.integer' => 'Jumlah pembayaran harus berupa angka bulat.',
