@@ -6,15 +6,18 @@ use App\Http\Controllers\UserController;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Lesson;
+use App\Models\LessonCompletion;
 use App\Models\Payment;
 use App\Models\User;
 use App\Service\Contracts\CourseService;
 use App\Service\Contracts\EnrollmentService;
+use App\Service\Contracts\LessonCompletionService;
 use App\Service\Contracts\LessonService;
 use App\Service\Contracts\PaymentService;
 use App\Service\Contracts\UserService;
 use App\Service\Implements\CourseServiceImpl;
 use App\Service\Implements\EnrollmentServiceImpl;
+use App\Service\Implements\LessonCompletionServiceImpl;
 use App\Service\Implements\LessonServiceImpl;
 use App\Service\Implements\PaymentServiceImpl;
 use App\Service\Implements\UserServiceImpl;
@@ -49,6 +52,10 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
 
         $this->app->bind(Enrollment::class, function ($app) {
             return new Enrollment();
+        });
+
+        $this->app->bind(LessonCompletion::class, function ($app) {
+            return new LessonCompletion();
         });
 
         $this->app->bind(
@@ -104,6 +111,18 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
             );
         });
 
+        $this->app->bind(LessonCompletionService::class, function ($app) {
+            return new LessonCompletionServiceImpl(
+                $app->make(LessonCompletion::class),
+                $app->make(Lesson::class),
+                $app->make(Course::class),
+                $app->make(Enrollment::class),
+                $app->make(Logger::class),
+                $app->make(AuthFactory::class),
+                $app->make(Gate::class)
+            );
+        });
+
         $this->app->bind(UserController::class, function ($app) {
             return new UserController(
                 $app->make(UserService::class),
@@ -122,6 +141,6 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
     }
 
     public function provides(): array {
-        return [UserService::class, UserController::class, CourseService::class,  LessonService::class, PaymentService::class, EnrollmentService::class];
+        return [UserService::class, UserController::class, CourseService::class,  LessonService::class, PaymentService::class, EnrollmentService::class, LessonService::class];
     }
 }
