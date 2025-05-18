@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -64,6 +65,11 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
             'role' => Role::class,
         ];
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role->value  == $role;
     }
 
     public function courses () : HasMany
