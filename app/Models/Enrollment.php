@@ -25,6 +25,7 @@ class Enrollment extends Model
         'course_id',
         'student_id',
         'enrolled_at',
+        'status',
     ];
 
     protected static function boot() :void
