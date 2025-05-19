@@ -39,6 +39,15 @@ class FilterUserByEmailRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.exists' => 'Email anda cari tidak ada',
+        ];
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
