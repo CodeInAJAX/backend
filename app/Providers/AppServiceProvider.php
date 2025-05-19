@@ -6,12 +6,14 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\LessonCompletion;
+use App\Models\Rating;
 use App\Models\User;
 use App\Policies\CoursePolicy;
 use App\Policies\EnrollmentPolicy;
 use App\Policies\LessonCompletionPolicy;
 use App\Policies\LessonPolicy;
 use App\Policies\PaymentPolicy;
+use App\Policies\RatingPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Database\Eloquent\Model;
 //use Illuminate\Http\Resources\Json\JsonResource;
@@ -47,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAll', [EnrollmentPolicy::class, 'viewAll']);
         Gate::policy(LessonCompletion::class, LessonCompletionPolicy::class);
         Gate::define('createLessonCompletion', [LessonCompletionPolicy::class, 'createLessonCompletion']);
+        Gate::policy(Rating::class, RatingPolicy::class);
+        Gate::define('createRating', [RatingPolicy::class, 'createRating']);
         Authenticate::redirectUsing(function ($request) {
 
             if ($request->expectsJson() || $request->is('api/*')) {
