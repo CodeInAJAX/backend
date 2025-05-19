@@ -45,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAllByCourse', [LessonPolicy::class, 'viewAllByCourse']);
         Gate::define('viewAll', [PaymentPolicy::class, 'viewAll']);
         Gate::define('viewAll', [EnrollmentPolicy::class, 'viewAll']);
+        Gate::policy(LessonCompletion::class, LessonCompletionPolicy::class);
         Gate::define('createLessonCompletion', [LessonCompletionPolicy::class, 'createLessonCompletion']);
         Authenticate::redirectUsing(function ($request) {
 
