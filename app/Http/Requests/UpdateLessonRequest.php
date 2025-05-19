@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class UpdateLessonRequest extends FormRequest
 {
@@ -52,6 +53,13 @@ class UpdateLessonRequest extends FormRequest
                 'sometimes',
                 'integer',
             ],
+            'order_number' => [
+                'sometimes',
+                'integer',
+                Rule::unique('lessons', 'order_number')->where(function ($query) {
+                    return $query->where('course_id', $this->route('courseId'));
+                })
+            ]
         ];
     }
 
@@ -67,7 +75,8 @@ class UpdateLessonRequest extends FormRequest
             'video_link.url' => 'Link video harus berupa URL yang valid (http atau https).',
 
             'duration.integer' => 'Durasi harus berupa angka.',
-
+            'order_number.integer' => 'Nomor urutan harus berupa angka.',
+            'order_number.unique' => 'Nomor urutan sudah terpakai.',
         ];
     }
     public function validationData(): array
