@@ -10,11 +10,11 @@ use App\Http\Resources\LessonCompletionResource;
 interface LessonCompletionService
 {
 
-    public function show(string $lessonCompletionLessonCompletionId) :LessonCompletionResource;
+    public function show(string $lessonCompletionId) :LessonCompletionResource;
 
     public function create(StoreLessonCompletionRequest $data, string $lessonId) : LessonCompletionResource;
 
-    public function update(UpdateLessonCompletionRequest $data, string $lessonCompletionLessonCompletionId) :LessonCompletionResource;
+    public function update(UpdateLessonCompletionRequest $data, string $lessonCompletionId) :LessonCompletionResource;
 
-    public function delete(string $lessonCompletionLessonCompletionId) :array;
+    public function delete(string $lessonCompletionId) :array;
 }
