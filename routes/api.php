@@ -11,4 +11,6 @@ Route::get('/user', function (Request $request) {
 $this->router->name('api.users.')->prefix('/v1/users')->controller(UserController::class)->group(function () {
     $this->router->name('create')->post('/', 'store');
     $this->router->name('login')->post('/login', 'login');
+    $this->router->name('logout')->delete('/logout', 'logout');
+    $this->router->name('show')->get('/{email}', 'show');
 });
