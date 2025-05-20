@@ -16,6 +16,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Log\Logger;
@@ -154,6 +155,24 @@ class RatingServiceImpl implements RatingService
                     ]
                 ]
             ]));
+        } catch (QueryException $exception) {
+            $this->logger->error('failed to create the rating: query: ' . $exception->getMessage());
+            if ($exception->getCode() === '23505') { // PostgreSQL unique violation
+                throw new HttpResponseException($this -> errorResponse([
+                    [
+                        'title' => 'Gagal membuat rating untuk kursus',
+                        'details' => 'Anda sudah memberikan rating untuk kursus tersebut',
+                        'status' => 'STATUS_CONFLICT',
+                        'code' => 409,
+                        'meta' => [
+                            'en' => [
+                                'error' => $exception->getMessage()
+                            ]
+                        ]
+                    ]
+                ]));
+            }
+            throw $exception;
         }
         }
 
