@@ -8,18 +8,21 @@ use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\LessonCompletion;
 use App\Models\Payment;
+use App\Models\Rating;
 use App\Models\User;
 use App\Service\Contracts\CourseService;
 use App\Service\Contracts\EnrollmentService;
 use App\Service\Contracts\LessonCompletionService;
 use App\Service\Contracts\LessonService;
 use App\Service\Contracts\PaymentService;
+use App\Service\Contracts\RatingService;
 use App\Service\Contracts\UserService;
 use App\Service\Implements\CourseServiceImpl;
 use App\Service\Implements\EnrollmentServiceImpl;
 use App\Service\Implements\LessonCompletionServiceImpl;
 use App\Service\Implements\LessonServiceImpl;
 use App\Service\Implements\PaymentServiceImpl;
+use App\Service\Implements\RatingServiceImpl;
 use App\Service\Implements\UserServiceImpl;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Log\Logger;
@@ -56,6 +59,10 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
 
         $this->app->bind(LessonCompletion::class, function ($app) {
             return new LessonCompletion();
+        });
+
+        $this->app->bind(Rating::class, function ($app) {
+            return new Rating();
         });
 
         $this->app->bind(
@@ -100,6 +107,16 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
             );
         });
 
+        $this->app->bind(RatingService::class, function ($app) {
+            return new RatingServiceImpl(
+                $app->make(Rating::class),
+                $app->make(Course::class),
+                $app->make(Logger::class),
+                $app->make(AuthFactory::class),
+                $app->make(Gate::class)
+            );
+        });
+
         $this->app->bind(EnrollmentService::class, function ($app) {
             return new EnrollmentServiceImpl(
                 $app->make(Payment::class),
@@ -115,8 +132,6 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
             return new LessonCompletionServiceImpl(
                 $app->make(LessonCompletion::class),
                 $app->make(Lesson::class),
-                $app->make(Course::class),
-                $app->make(Enrollment::class),
                 $app->make(Logger::class),
                 $app->make(AuthFactory::class),
                 $app->make(Gate::class)
@@ -141,6 +156,6 @@ class ServicesLayerServiceProvider extends ServiceProvider implements Deferrable
     }
 
     public function provides(): array {
-        return [UserService::class, UserController::class, CourseService::class,  LessonService::class, PaymentService::class, EnrollmentService::class, LessonService::class];
+        return [UserService::class, UserController::class, CourseService::class,  LessonService::class, PaymentService::class, EnrollmentService::class, LessonService::class, LessonCompletionService::class, RatingService::class];
     }
 }
