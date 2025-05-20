@@ -26,6 +26,7 @@ class Profile extends Model
         'photo',
         'user_id',
         'about',
+        'gender'
     ];
 
     protected $casts = [
