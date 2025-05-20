@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\HttpResponses;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class PaginationRequest extends FormRequest
 {
+    use HttpResponses;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -31,6 +35,22 @@ class PaginationRequest extends FormRequest
                 'gt:0',
             ]
         ];
+    }
+
+    public function messages(): array {
+        return [
+            'page.integer' => 'Halaman harus berupa angka!',
+            'page.gt' => 'Halaman harus melebihi nilai 0',
+            'size.integer' => 'Ukuran harus berupa angka!',
+            'size.gt' => 'Ukuran harus melebihi nilai 0',
+        ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            $this->errorValidatorToResponse($validator)
+        );
     }
 
     public function validationData() :array
