@@ -10,9 +10,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 interface RatingService
 {
-    public function index(PaginationRequest $data) :AnonymousResourceCollection;
+    public function index(PaginationRequest $data, string $courseId) :AnonymousResourceCollection;
 
-    public function create(StoreRatingRequest $data) :RatingResource;
+    public function create(StoreRatingRequest $data, string $courseId) :RatingResource;
 
     public function show(string $id) :RatingResource;
 
