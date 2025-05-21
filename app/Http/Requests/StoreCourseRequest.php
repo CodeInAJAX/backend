@@ -60,6 +60,31 @@ class StoreCourseRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Judul wajib diisi.',
+            'title.string' => 'Judul harus berupa teks.',
+            'title.min' => 'Judul minimal terdiri dari :min karakter.',
+            'title.max' => 'Judul maksimal terdiri dari :max karakter.',
+
+            'thumbnail.required' => 'URL thumbnail wajib diisi.',
+            'thumbnail.string' => 'Thumbnail harus berupa teks.',
+            'thumbnail.url' => 'Thumbnail harus berupa URL yang valid (http atau https).',
+
+            'description.required' => 'Deskripsi wajib diisi.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+
+            'price.required' => 'Harga wajib diisi.',
+            'price.integer' => 'Harga harus berupa angka.',
+
+            'currency.required' => 'Mata uang wajib diisi.',
+            'currency.string' => 'Mata uang harus berupa teks.',
+        ];
+    }
+
+
+
     public function validationData(): array
     {
         return $this->only('title','thumbnail', 'description', 'price', 'currency');
