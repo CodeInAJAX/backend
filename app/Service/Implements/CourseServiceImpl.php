@@ -3,6 +3,7 @@
 namespace App\Service\Implements;
 
 use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\SearchPaginationRequest;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use App\Http\Resources\CourseResource;
@@ -367,6 +368,141 @@ class CourseServiceImpl implements CourseService
                 [
                     'title' => 'Gagal menghapus daftar kursus',
                     'details' => 'gagal menghapus kursus karena kegagalan server, untuk selengkapnya di meta properti',
+                    'code' => 500,
+                    'status' => 'INTERNAL_SERVER_ERROR',
+                    'meta' => [
+                        'en' => [
+                            'error' =>  $exception->getMessage()
+                        ]
+                    ]
+                ]
+            ]));
+        }
+    }
+
+    public function search(SearchPaginationRequest $data): AnonymousResourceCollection
+    {
+        try {
+            $this->logger->info('starts the authentication process before getting all courses by search');
+            // authentication the users
+            $user = $this->authGuard->user();
+            if (!$user) {
+                $this->logger->error('failed the authentication process before getting all courses by search');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'Gagal mendapatkan daftar kursus berdasarkan pencarian',
+                        'details' => 'gagal mendapatkan daftar kursus karena user tidak terautentikasi',
+                        'code' => 401,
+                        'status' => 'STATUS_UNAUTHORIZED',
+                    ]
+                ]));
+            }
+            $this->logger->info('start the process of getting all courses by search with user id', [
+                'user_id' => $user->id
+            ]);
+
+            // get pagination parameters
+            $page = $data->validated('page', 1);
+            $size = $data->validated('size', 10);
+            $search = $data->validated('search');
+
+            // query courses with relations
+            $courses = $this->course->newModelQuery()
+                ->with(['mentor', 'lessons'])
+                ->whereLike('title', "%{$search}%")
+                ->paginate($size, ['*'], 'page', $page);
+
+            $this->logger->info('successfully retrieved all courses', [
+                'total' => $courses->total(),
+                'page' => $courses->currentPage(),
+                'size' => $courses->perPage(),
+            ]);
+
+            return CourseResource::collection($courses);
+        } catch (\Exception $exception) {
+
+            $this->logger->error('failed to get all courses by search: ' . $exception->getMessage());
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Gagal mendapatkan daftar kursus berdasarkan pencarian',
+                    'details' => 'gagal mendapatkan kursus karena kegagalan server, untuk selengkapnya di meta properti',
+                    'code' => 500,
+                    'status' => 'INTERNAL_SERVER_ERROR',
+                    'meta' => [
+                        'en' => [
+                            'error' =>  $exception->getMessage()
+                        ]
+                    ]
+                ]
+            ]));
+        }
+    }
+
+    public function detail(string $id): CourseResource
+    {
+        try {
+            $this->logger->info('starts the authentication process before getting detail course');
+            // authentication the users
+            $user = $this->authGuard->user();
+            if (!$user) {
+                $this->logger->error('failed the authentication process before getting detail course');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'Gagal mendapatkan detail kursus',
+                        'details' => 'gagal mendapatkan detail kursus karena user tidak terautentikasi',
+                        'code' => 401,
+                        'status' => 'STATUS_UNAUTHORIZED',
+                    ]
+                ]));
+            }
+            $this->logger->info('start the process of getting detail course with user id', [
+                'user_id' => $user->id
+            ]);
+
+            // query courses with relations
+            $course = $this->course->newModelQuery()
+                ->with(['mentor', 'lessons', 'payments'])
+                ->find($id);
+
+            if (!$course) {
+                $this->logger->error('failed to getting detail course with id: ' . $id);
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'Gagal mendapatkan detail kursus',
+                        'details' => 'gagal mendapatkan detail kursus, karena kursus tidak ditemukan',
+                        'code' => 404,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
+                ]));
+            }
+
+            if (!$this->gate->allows('view', $course)) {
+                $this->logger->error('failed the authorization process before getting detail course');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'Gagal mendapatkan detail kursus',
+                        'details' => 'gagal mendapatkan detail kursus, karena user tidak diizinkan untuk melakukan aksi ini',
+                        'code' => 403,
+                        'status' => 'STATUS_FORBIDDEN'
+                    ]
+                ]));
+            }
+
+            $this->logger->info('successfully retrieved getting detail course');
+            return new CourseResource($course);
+        } catch (\Exception $exception) {
+
+            $this->logger->error('failed to get all courses by search: ' . $exception->getMessage());
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Gagal mendapatkan detail kursus',
+                    'details' => 'gagal mendapatkan detail kursus karena kegagalan server, untuk selengkapnya di meta properti',
                     'code' => 500,
                     'status' => 'INTERNAL_SERVER_ERROR',
                     'meta' => [
