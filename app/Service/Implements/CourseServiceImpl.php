@@ -67,7 +67,7 @@ class CourseServiceImpl implements CourseService
 
             // query courses with relations
             $courses = $this->course->newModelQuery()
-                ->with(['mentor', 'lessons'])
+                ->with(['mentor', 'students', 'ratingsUsers'])
                 ->paginate($size, ['*'], 'page', $page);
 
             $this->logger->info('successfully retrieved all courses', [
@@ -121,7 +121,7 @@ class CourseServiceImpl implements CourseService
             ]);
 
             // validate request
-            $course = $this->course->newModelQuery()->with(['mentor','lessons'])->find($id);
+            $course = $this->course->newModelQuery()->with(['mentor','students', 'ratingsUsers'])->find($id);
             if (!$course) {
                 $this->logger->error('failed to show the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
@@ -408,7 +408,7 @@ class CourseServiceImpl implements CourseService
 
             // query courses with relations
             $courses = $this->course->newModelQuery()
-                ->with(['mentor', 'lessons'])
+                ->with(['mentor', 'students', 'ratingsUsers'])
                 ->whereLike('title', "%{$search}%")
                 ->paginate($size, ['*'], 'page', $page);
 
@@ -464,7 +464,7 @@ class CourseServiceImpl implements CourseService
 
             // query courses with relations
             $course = $this->course->newModelQuery()
-                ->with(['mentor', 'lessons', 'payments'])
+                ->with(['mentor', 'lessons', 'payments', 'students', 'ratingsUsers'])
                 ->find($id);
 
             if (!$course) {
