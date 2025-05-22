@@ -7,8 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
+
 
 class LoginUserRequest extends FormRequest
 {
@@ -31,10 +30,7 @@ class LoginUserRequest extends FormRequest
         return [
             'email' => [
                 'required',
-                Rule::email()
-                    ->rfcCompliant(strict: false)
-                    ->validateMxRecord()
-                    ->preventSpoofing(),
+                'email',
                 'exists:users,email',
             ],
             'password' => [
