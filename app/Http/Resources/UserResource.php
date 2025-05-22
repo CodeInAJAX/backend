@@ -16,29 +16,11 @@ class UserResource extends JsonResource
 {
     public function __construct($resource)
     {
-        if (! $resource instanceof User) {
-            throw new InvalidArgumentException('UserResource only accepts instances of ' . User::class);
-        }
-
         parent::__construct($resource);
     }
 
     public static function collection($resource): AnonymousResourceCollection
     {
-        if (method_exists($resource, 'getCollection')) {
-            $items = $resource->getCollection(); // untuk paginator
-        } elseif ($resource instanceof \Traversable || is_array($resource)) {
-            $items = $resource;
-        } else {
-            throw new InvalidArgumentException('Invalid resource collection');
-        }
-
-        foreach ($items as $item) {
-            if (! $item instanceof User) {
-                throw new InvalidArgumentException('UserResource::collection only accepts instances of ' . User::class);
-            }
-        }
-
         return parent::collection($resource);
     }
 
@@ -61,7 +43,8 @@ class UserResource extends JsonResource
                 'photo' => $this->profile->photo,
             ],
             'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at
+            'updatedAt' => $this->updated_at,
+            'courses' => CourseResource::collection($this->whenLoaded('courses')),
         ];
     }
 }
