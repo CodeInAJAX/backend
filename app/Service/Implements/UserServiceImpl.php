@@ -6,21 +6,31 @@ use App\Enums\Gender;
 use App\Enums\Role;
 use App\Http\Requests\FilterUserByEmailRequest;
 use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\PaginationUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Service\Contracts\UserService;
 use App\Traits\HttpResponses;
+//use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\ValidationException;
+//use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Gate;
 use \Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class UserServiceImpl implements UserService
 {
@@ -36,9 +46,33 @@ class UserServiceImpl implements UserService
     {
     }
 
-    public function getAll(): UserResource
+    public function getAll(PaginationUserRequest $data): AnonymousResourceCollection
     {
-        return new UserResource();
+        try {
+            $this->logger->info('starts the process of listing users by pagination');
+            // Validate the request
+            $validate = $data->validated();
+            $page = $validate['page'] ?? 1;
+            $size = $validate['size'] ?? 10;
+
+            $this->logger->info('successfully passed the validation process, then the process of listing a user');
+            $this->logger->info("pagination request received: page={$page}, size={$size}");
+
+            $query = $this->user->newQuery()->with('profile');
+
+            $users = $query->paginate(perPage: $size, page: $page);
+
+
+            $this->logger->info('successfully retrieved paginated users');
+            $this->logger->info('successfully goes through all the subsequent processes returning the result');
+            return UserResource::collection($users);
+        } catch (\Exception $exception){
+            $this->logger->error('failed processing request for listing users',  [
+                'error' => $exception->getMessage()
+            ]);
+
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Pagination Failed'));
+        }
     }
 
     public function create(StoreUserRequest $data): UserResource
@@ -85,15 +119,291 @@ class UserServiceImpl implements UserService
         }
     }
 
-    public function update(string $id, UpdateUserRequest $data): UserResource
+    /**
+     * Update the authenticated user with the provided data
+     *
+     * @param UpdateUserRequest $data
+     * @return UserResource
+     */
+    public function update(UpdateUserRequest $data): UserResource
     {
-        return new UserResource();
+        try {
+            $this->logger->info('starting the process of updating a user by authentication');
+            // Get the user from auth
+            $user = Auth::guard('api')->user();
+            if (!$user) {
+                $this->logger->error('failed processing request for update user: User not authenticated');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'User Update Failed',
+                        'details' => 'failed to update the user: the user is not authenticated',
+                        'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                        'status' => 'STATUS_UNAUTHORIZED'
+                    ]
+                ]));
+            }
+
+            $validated = $data->validated();
+            $this->logger->info('successfully passed validation process', [
+                'user_id' => $user->id,
+                'fields' => array_keys($validated)
+            ]);
+
+            // Check if user is authorized to update
+            if (!Gate::authorize('update', $user)) {
+                $this->logger->error('failed processing request for update user: Not authorized', [
+                    'user_id' => $user->id
+                ]);
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'User Update Failed',
+                        'details' => 'failed to update the user: the user is not authorized to perform this action',
+                        'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                        'status' => 'STATUS_UNAUTHORIZED'
+                    ]
+                ]));
+            }
+
+            $this->logger->info('successfully passed authorization, proceeding with update');
+            $updatedFields = [];
+
+            // Handle email update separately to check for uniqueness
+            if (isset($validated['email']) && $validated['email'] !== $user->email) {
+                $existingUser = User::where('email', $validated['email'])->where('id', '!=', $user->id)->exists();
+                if ($existingUser) {
+                    $this->logger->error('update user failed: Email already in use', [
+                        'user_id' => $user->id,
+                        'email' => $validated['email']
+                    ]);
+                    throw new HttpResponseException($this->errorResponse([
+                        [
+                            'title' => 'User Update Failed',
+                            'details' => 'failed to update the user, because the email user is already in use',
+                            'code' => HttpResponse::HTTP_CONFLICT,
+                            'status' => 'STATUS_CONFLICT'
+                        ]
+                    ]));
+                }
+                $user->email = $validated['email'];
+                $updatedFields[] = 'email';
+            }
+
+            // Handle basic user fields
+            $userFields = ['name', 'password'];
+            foreach ($userFields as $field) {
+                if (isset($validated[$field])) {
+                    if ($field === 'password') {
+                        $user->password = Hash::make($validated[$field]);
+                    } else {
+                        $user->$field = $validated[$field];
+                    }
+                    $updatedFields[] = $field;
+                }
+            }
+
+            // Save user changes
+            $user->save();
+
+            // Handle profile-related fields
+            $profileFields = ['photo', 'gender', 'about'];
+            $profileUpdated = false;
+
+            // Get or create the user profile
+            $profile = $user->profile;
+            if (!$profile) {
+                $profile = new Profile();
+                $profile->user_id = $user->id;
+            }
+
+            foreach ($profileFields as $field) {
+                if (isset($validated[$field])) {
+                    $profile->$field = $validated[$field];
+                    $updatedFields[] = $field;
+                    $profileUpdated = true;
+                }
+            }
+
+            // Save profile if any changes were made
+            if ($profileUpdated) {
+                $profile->save();
+            }
+
+            // Refresh user with profile relationship
+            $user->refresh();
+            $user->load('profile');
+
+            $this->logger->info('User update successful', [
+                'user_id' => $user->id,
+                'updated_fields' => $updatedFields
+            ]);
+
+            return new UserResource($user);
+        } catch (ModelNotFoundException $exception) {
+            $this->logger->error('Failed processing update user: User not found', [
+                'error' => $exception->getMessage()
+            ]);
+            $this->logger->error('failed processing update user', [
+                'errors' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Update Failed',
+                    'details' => 'user cannot be found, you must be registered',
+                    'code' => HttpResponse::HTTP_NOT_FOUND,
+                    'status' => 'STATUS_NOT_FOUND',
+                ]
+            ]));
+        } catch (\Exception $exception) {
+            $this->logger->error('Failed processing update user: Unexpected error', [
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString()
+            ]);
+            throw new HttpResponseException($this->errorInternalToResponse($exception,'User Update Failed'));
+        }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
-        return true;
+        $this->logger->info('starting the process of delete a user (admin)');
+        // Get the authenticated user
+        $user = Auth::guard('api')->user();
+        $this->logger->info('Delete user attempt', [
+            'admin_id' => $user ? $user->id : 'unauthenticated',
+            'target_user_id' => $id
+        ]);
+
+        // Check if user is authenticated
+        if (!$user) {
+            $this->logger->error('Delete user failed: User not authenticated');
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Delete Failed',
+                    'details' => 'failed to delete the user: the user is not authenticated',
+                    'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                    'status' => 'STATUS_UNAUTHORIZED'
+                ]
+            ]));
+        }
+
+        // Find the user to delete
+        $userToDelete = $this->user->newQuery()->find($id);
+
+        if (!$userToDelete) {
+            $this->logger->error('Delete user failed: User not found', ['target_user_id' => $id]);
+            return new HttpResponseException(
+                $this->errorResponse([
+                    [
+                        'title' => 'User Delete Failed',
+                        'details' => 'failed to delete the user: the user to delete not found',
+                        'code' => HttpResponse::HTTP_NOT_FOUND,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
+                ])
+            );
+        }
+
+        // Check if user is authorized to delete
+        if (!Gate::authorize('delete', $userToDelete)) {
+            $this->logger->warning('Delete user unauthorized: Admin role required', [
+                'user_id' => $user->id,
+                'user_role' => $user->role
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Delete Failed',
+                    'details' => 'failed to delete the user: the user is not authorized to perform this action',
+                    'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                    'status' => 'STATUS_UNAUTHORIZED'
+                ]
+            ]));
+        }
+
+        // Soft delete the user
+        $userToDelete->delete();
+
+        $this->logger->info('User deleted successfully', [
+            'admin_id' => $user->id,
+            'deleted_user_id' => $userToDelete->id,
+            'deleted_user_email' => $userToDelete->email
+        ]);
+
+        return [
+            'admin_id' => $user->id,
+            'deleted_user_id' => $userToDelete->id,
+        ];
     }
+
+    public function restore(string $id): array
+    {
+        $this->logger->info('starting the process of restore a user (admin)');
+        // Get the authenticated user
+        $user = Auth::guard('api')->user();
+        $this->logger->info('Restore user attempt', [
+            'admin_id' => $user ? $user->id : 'unauthenticated',
+            'target_user_id' => $id
+        ]);
+
+        // Check if user is authenticated
+        if (!$user) {
+            $this->logger->error('Restore user failed: User not authenticated');
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Restore Failed',
+                    'details' => 'failed to restore the user: the user is not authenticated',
+                    'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                    'status' => 'STATUS_UNAUTHORIZED'
+                ]
+            ]));
+        }
+
+        // Find the user to restore
+        $userToRestore = User::withTrashed()->find($id);
+
+        if (!$userToRestore) {
+            $this->logger->error('Restore user failed: User not found', ['target_user_id' => $id]);
+            return new HttpResponseException(
+                $this->errorResponse([
+                    [
+                        'title' => 'User Restore Failed',
+                        'details' => 'failed to restore the user: the user to restore not found',
+                        'code' => HttpResponse::HTTP_NOT_FOUND,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
+                ])
+            );
+        }
+
+        // Check if user is authorized to restore
+        if (!Gate::authorize('restore', $userToRestore)) {
+            $this->logger->warning('Restore user unauthorized: Admin role required', [
+                'user_id' => $user->id,
+                'user_role' => $user->role
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Restore Failed',
+                    'details' => 'failed to restore the user: the user is not authorized to perform this action',
+                    'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                    'status' => 'STATUS_UNAUTHORIZED'
+                ]
+            ]));
+        }
+
+        // restore the user
+        $userToRestore->restore();
+
+        $this->logger->info('User restore successfully', [
+            'admin_id' => $user->id,
+            'restore_user_id' => $userToRestore->id,
+            'restore_user_email' => $userToRestore->email
+        ]);
+
+        return [
+            'admin_id' => $user->id,
+            'restore_user_id' => $userToRestore->id,
+        ];
+    }
+
 
     public function login(LoginUserRequest $data): array
     {
@@ -194,5 +504,81 @@ class UserServiceImpl implements UserService
         $this->logger->info('successfully goes through all the subsequent processes returning the result');
 
         return new UserResource($user);
+    }
+
+    public function refresh(Request $request): array
+    {
+        try {
+
+            $this->logger->info('starts the process of refresh token to generate access token');
+
+            $refreshToken = $request->cookie('refresh_token');
+
+            if (!$refreshToken) {
+                $this->logger->error('failed processing refresh token because refresh token is missing');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'User Refresh Token Failed',
+                        'details' => 'refresh token value not provided in cookie',
+                        'code' => 400,
+                        'status' => 'STATUS_BAD_REQUEST',
+                    ]
+                ]));
+            }
+
+            $this->logger->info('successfully get the next token refresh payload validation process');
+
+            $payload = Auth::guard('api')->setToken($refreshToken)->payload();
+            if (!$payload || !isset($payload['refresh']) || $payload['refresh'] !== true) {
+                $this->logger->error('failed processing refresh token because invalid refresh token');
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'User Refresh Token Failed',
+                        'details' => 'invalid credentials refresh token value',
+                        'code' => 401,
+                        'status' => 'STATUS_UNAUTHORIZED',
+                    ]
+                ]));
+            }
+
+            $this->logger->info('successful payload validation then find the users to recreate access tokens');
+
+            $user = $this->user->newQuery()
+                ->findOrFail($payload['sub']);
+
+            $accessToken = Auth::guard('api')->login($user);
+
+            $this->logger->info('successfully recreate the access token next return the result');
+
+            return [
+                'access_token' => $accessToken,
+                'token_type' => 'Bearer',
+                'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
+            ];
+        } catch (ModelNotFoundException $exception) {
+            $this->logger->error('failed processing refresh token for refresh access token', [
+                'errors' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Refresh Token Failed',
+                    'details' => 'user cannot be found, you must be registered',
+                    'code' => HttpResponse::HTTP_NOT_FOUND,
+                    'status' => 'STATUS_NOT_FOUND',
+                ]
+            ]));
+        }  catch (TokenExpiredException $exception) {
+            $this->logger->error('failed processing refresh token for refresh access token', [
+                'errors' => $exception->getMessage()
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'User Refresh Token Failed',
+                    'details' => 'Your refresh token must be no expired to perform this action. You can update the refresh token by login again',
+                    'code' => HttpResponse::HTTP_FORBIDDEN,
+                    'status' => 'STATUS_FORBIDDEN',
+                ]
+            ]));
+        } ;
     }
 }
