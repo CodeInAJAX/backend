@@ -5,9 +5,6 @@ namespace App\Service\Implements;
 use App\Http\Requests\StoreLessonCompletionRequest;
 use App\Http\Requests\UpdateLessonCompletionRequest;
 use App\Http\Resources\LessonCompletionResource;
-use App\Http\Resources\LessonResource;
-use App\Models\Course;
-use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\LessonCompletion;
 use App\Service\Contracts\LessonCompletionService;
@@ -176,7 +173,7 @@ class LessonCompletionServiceImpl implements LessonCompletionService
                 'completed_at' => now(),
             ]);
             $this->logger->info('successfully created lesson completion and will return the result');
-            return new LessonResource($lessonCompletion);
+            return new LessonCompletionResource($lessonCompletion);
         } catch (MissingAttributeException $exception) {
             $this->logger->error('failed to create the lesson completion: missing attribute: ' . $exception->getMessage());
             throw new HttpResponseException($this->errorResponse([
@@ -221,7 +218,7 @@ class LessonCompletionServiceImpl implements LessonCompletionService
             $validated = $data->validated();
             $lessonCompletion = $this->lessonCompletion->newQuery()->find($lessonCompletionId);
             if (!$lessonCompletion) {
-                $this->logger->error('failed to update the lesson completion: lesson was not found');
+                $this->logger->error('failed to update the lesson completion: lesson completion was not found');
                 throw new HttpResponseException(
                     $this->errorResponse([
                         [
@@ -249,9 +246,11 @@ class LessonCompletionServiceImpl implements LessonCompletionService
                 );
             }
 
-            $lessonCompletion->watch_duration = $validated['watch_duration'];
-            $lessonCompletion->completed_at = now();
-            $lessonCompletion->save();
+            if (isset($validated['watch_duration'])) {
+                $lessonCompletion->watch_duration = $validated['watch_duration'];
+                $lessonCompletion->completed_at = now();
+                $lessonCompletion->save();
+            }
 
             $this->logger->info('successfully updated lesson completion and will return the result');
             return new LessonCompletionResource($lessonCompletion);
