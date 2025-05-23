@@ -22,28 +22,17 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (JWTException | TokenInvalidException | TokenExpiredException | AuthenticationException $e, Request $request) {
-            if ($request->expectsJson()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 if ($e instanceof TokenExpiredException) {
                     return response()->json([
                         'errors' => [
                             'title' => 'Users Forbidden',
-                            'detail' => 'You token must be refresh to perform this action.',
+                            'detail' => 'Your token must be refresh to perform this action.',
                             'code' => Response::HTTP_FORBIDDEN,
                             'status' => 'STATUS_FORBIDDEN',
                         ]
                     ], Response::HTTP_UNAUTHORIZED);
                 }
-                return response()->json([
-                    'errors' => [
-                        'title' => 'Users Unauthorized',
-                        'detail' => 'You must authenticate to perform this action.',
-                        'code' => Response::HTTP_UNAUTHORIZED,
-                        'status' => 'STATUS_UNAUTHORIZED',
-                    ]
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            if ($request->is('api/*')) {
                 return response()->json([
                     'errors' => [
                         'title' => 'Users Unauthorized',
