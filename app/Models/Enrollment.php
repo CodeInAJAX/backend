@@ -52,4 +52,26 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+    public function calculateProgress(): float|int
+    {
+        $totalLessons = $this->course->lessons()->count();
+
+        if ($totalLessons === 0) {
+            return 0;
+        }
+
+        $completedLessons = LessonCompletion::query()->where('student_id', $this->student_id)
+            ->whereIn('lesson_id', $this->course->lessons()->pluck('id'))
+            ->count();
+
+        $progressPercentage = ($completedLessons / $totalLessons) * 100;
+
+        if ($progressPercentage >= 100) {
+            $this->status = Status::COMPLETED;
+            $this->save();
+        }
+
+        return $progressPercentage;
+    }
 }
