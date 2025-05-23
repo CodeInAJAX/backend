@@ -60,6 +60,29 @@ class StoreLessonRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Judul wajib diisi.',
+            'title.string' => 'Judul harus berupa teks.',
+            'title.max' => 'Judul maksimal :max karakter.',
+
+            'description.required' => 'Deskripsi wajib diisi.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+
+            'video_link.required' => 'Link video wajib diisi.',
+            'video_link.string' => 'Link video harus berupa teks.',
+            'video_link.url' => 'Link video harus berupa URL yang valid (http atau https).',
+
+            'duration.required' => 'Durasi wajib diisi.',
+            'duration.integer' => 'Durasi harus berupa angka.',
+
+            'order_number.required' => 'Nomor urutan wajib diisi.',
+            'order_number.integer' => 'Nomor urutan harus berupa angka.',
+        ];
+    }
+
+
     public function validationData(): array
     {
         return $this->only('title', 'description', 'video_link', 'duration', 'order_number');
