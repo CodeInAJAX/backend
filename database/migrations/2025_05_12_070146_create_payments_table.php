@@ -17,8 +17,8 @@ return new class extends Migration
             $table->integer('amount')->nullable(false);
             $table->string('currency')->nullable(false);
             $table->enum('payment_method', ['credit_card', 'bank_transfer', 'e_wallet', 'cash'])->default('cash');
-            $table->foreignUlid('user_id')->references('id')->on('users');
-            $table->foreignUlid('course_id')->references('id')->on('courses');
+            $table->foreignUlid('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignUlid('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
             $table->unique(['course_id', 'user_id']);
             $table->timestamps();
         });
