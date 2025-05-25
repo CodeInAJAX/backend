@@ -217,6 +217,8 @@
     'App\\Service\\Contracts\\LessonService' => 'App\\Providers\\ServicesLayerServiceProvider',
     'App\\Service\\Contracts\\PaymentService' => 'App\\Providers\\ServicesLayerServiceProvider',
     'App\\Service\\Contracts\\EnrollmentService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\LessonCompletionService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\RatingService' => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'when' => 
   array (
