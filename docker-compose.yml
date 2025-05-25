@@ -1,4 +1,18 @@
 services:
+#    laravel:
+#        build:
+#            context: .
+#            dockerfile: ./Dockerfile
+#        container_name: "rest-api-codeinajax"
+#        ports:
+#            -   "8080:80"
+#        networks:
+#            - network_laravel
+#            - network_postgresql
+#        volumes:
+#            - '.env:/var/www/html/.env:rw'
+
+
     postgresql:
         container_name: "postgresql"
         image: postgres:13-alpine
@@ -19,6 +33,8 @@ services:
 networks:
     network_postgresql:
         name: 'network_postgresql'
+#    network_laravel:
+#        name: 'network_laravel'
 
 volumes:
     postgresql_volume:
