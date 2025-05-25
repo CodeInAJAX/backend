@@ -89,6 +89,12 @@ class User extends Authenticatable implements JWTSubject
             ->withPivot( 'status');
     }
 
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'student_id');
+    }
+
+
     public function lessonsCompletions() :HasMany
     {
         return $this->hasMany(LessonCompletion::class, 'student_id');

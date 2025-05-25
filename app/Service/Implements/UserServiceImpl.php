@@ -629,7 +629,7 @@ class UserServiceImpl implements UserService
         $this->logger->info('starts the process of getting a detail user');
 
         $user = $this->user->newQuery()
-            ->with(['profile','courses.payments','enrolledCourses', 'payments'])
+            ->with(['profile', 'enrolledCourses.students','courses.payments', 'enrollments', 'payments'])
             ->find($user->id);
 
         if (!$user) {

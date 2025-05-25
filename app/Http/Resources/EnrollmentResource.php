@@ -29,7 +29,7 @@ class EnrollmentResource extends JsonResource
             'updatedAt' => $this->updated_at,
             'course' => new CourseResource($this->whenLoaded('course')),
             'student' => new UserResource($this->whenLoaded('student')),
-            'progress' => $this->calculateProgress()
+            'progress' => $this->resource->calculateProgress()
         ];
     }
 }

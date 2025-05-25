@@ -47,6 +47,12 @@ class Course extends Model
             ->withPivot( 'status');
     }
 
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'course_id');
+    }
+
+
     public function ratingsUsers() : BelongsToMany
     {
         return $this->belongsToMany(User::class, 'ratings', 'course_id', 'user_id')
