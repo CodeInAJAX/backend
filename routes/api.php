@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LessonCompletionController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -52,4 +53,11 @@ $this->router->name('api.enrollments')->prefix('/v1/enrollments')->controller(En
     $this->router->name('index')->get('/', 'index');
     $this->router->name('show')->get('/{id}', 'show');
     $this->router->name('destroy')->delete('/{id}', 'destroy');
+});
+
+$this->router->name('api.lessonCompletion.')->prefix('/v1/lessons')->controller(LessonCompletionController::class)->group(function () {
+    $this->router->name('show')->get('/{lessonId}/complete/{lessonCompletionId}', 'show');
+    $this->router->name('store')->post('/{lessonId}/complete', 'store');
+    $this->router->name('update')->patch('/{lessonId}/complete/{lessonCompletionId}', 'update');
+    $this->router->name('destroy')->delete('/{lessonId}/uncompleted/{lessonCompletionId}', 'destroy');
 });
