@@ -71,6 +71,38 @@ class StoreUserRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama wajib diisi.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama maksimal 255 karakter.',
+
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan.',
+
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.string' => 'Kata sandi harus berupa teks.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.max' => 'Kata sandi maksimal 255 karakter.',
+
+            'role.required' => 'Peran wajib diisi.',
+            'role.string' => 'Peran harus berupa teks.',
+            'role.Illuminate\Validation\Rules\Enum' => 'Peran yang dipilih tidak valid.',
+
+            'photo.required' => 'URL foto wajib diisi.',
+            'photo.string' => 'URL foto harus berupa teks.',
+            'photo.url' => 'URL foto harus berupa URL yang valid (http atau https).',
+
+            'gender.required' => 'Jenis kelamin wajib diisi.',
+            'gender.string' => 'Jenis kelamin harus berupa teks.',
+            'gender.Illuminate\Validation\Rules\Enum' => 'Jenis kelamin yang dipilih tidak valid.',
+
+            'about.string' => 'Tentang harus berupa teks.',
+        ];
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
