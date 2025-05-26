@@ -38,10 +38,7 @@ class StoreUserRequest extends FormRequest
             ],
             'email' => [
                 'required',
-                Rule::email()
-                    ->rfcCompliant(strict: false)
-                    ->validateMxRecord()
-                    ->preventSpoofing(),
+                'email',
                 'unique:users,email'
             ],
             'password' => [
