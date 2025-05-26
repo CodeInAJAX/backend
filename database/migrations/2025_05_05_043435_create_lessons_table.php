@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('order_number')->nullable();
             $table->foreignUlid('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->timestamps();
+            $table->unique(['course_id', 'order_number']);
         });
     }
 

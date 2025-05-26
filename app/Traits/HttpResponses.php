@@ -40,15 +40,32 @@ trait HttpResponses
         $errorsResponse = [];
         foreach ($errors as $key => $value ) {
             $errorsResponse[] = [
-                'title' => 'Users Request Validation Failed',
+                'title' => 'Gagal mengvalidasi permintaan',
                 'details' => $value,
                 'code' => 400,
-                'status' => 'Bad Request',
+                'status' => 'STATUS_BAD_REQUEST',
             ];
         }
         return response()->json([
             'errors' => $errorsResponse
         ], 400);
+    }
+
+    public function errorInternalToResponse(\Exception $exception, string $title): JsonResponse
+    {
+        return $this->errorResponse([
+            [
+                'title' => $title,
+                'details' => 'Ada kesalahan dalam server, untuk detail kesalahan di meta properti',
+                'code' => 500,
+                'status' => 'STATUS_INTERNAL_SERVER_ERROR',
+                'meta' => [
+                    'en' => [
+                        'error' => $exception->getMessage(),
+                    ]
+                ]
+            ]
+        ]);
     }
 }
 

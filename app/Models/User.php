@@ -12,9 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -65,6 +67,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function hasRole(string $role): bool
+    {
+        return $this->role->value  == $role;
+    }
+
     public function courses () : HasMany
     {
         return $this->hasMany(Course::class, 'mentor_id');
@@ -80,6 +87,22 @@ class User extends Authenticatable
         return $this->belongsToMany(Course::class, 'enrollments', 'student_id', 'course_id')
             ->withTimestamps()
             ->withPivot( 'status');
+    }
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'student_id');
+    }
+
+
+    public function lessonsCompletions() :HasMany
+    {
+        return $this->hasMany(LessonCompletion::class, 'student_id');
+    }
+
+    public function payments() : HasMany
+    {
+        return $this->hasMany(Payment::class, 'user_id');
     }
 
     public function ratingsCourses() : BelongsToMany
@@ -98,6 +121,17 @@ class User extends Authenticatable
                 $model->id = (string) Str::ulid();
             }
         });
+    }
+
+    public function getJWTIdentifier () {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims () : array {
+        return [
+            'email',
+            'role'
+        ];
     }
 
 }

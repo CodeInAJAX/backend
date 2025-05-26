@@ -16,20 +16,12 @@ class UserResource extends JsonResource
 {
     public function __construct($resource)
     {
-        if (! $resource instanceof User) {
-            throw new InvalidArgumentException('UserResource only accepts instances of ' . User::class);
-        }
-
         parent::__construct($resource);
     }
 
     public static function collection($resource): AnonymousResourceCollection
     {
-        if (! $resource instanceof Collection || $resource->first() instanceof User) {
-            return parent::collection($resource);
-        }
-
-        throw new InvalidArgumentException('UserResource::collection only accepts instances of ' . User::class);
+        return parent::collection($resource);
     }
 
 
@@ -51,7 +43,11 @@ class UserResource extends JsonResource
                 'photo' => $this->profile->photo,
             ],
             'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at
+            'updatedAt' => $this->updated_at,
+            'courses' => CourseResource::collection($this->whenLoaded('courses')),
+            'enrolledCourses' => CourseResource::collection($this->whenLoaded('enrolledCourses')),
+            'enrollments' => EnrollmentResource::collection($this->whenLoaded('enrollments')),
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
     }
 }

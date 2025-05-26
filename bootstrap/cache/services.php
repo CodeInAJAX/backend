@@ -26,15 +26,15 @@
     22 => 'Illuminate\\View\\ViewServiceProvider',
     23 => 'Knuckles\\Scribe\\ScribeServiceProvider',
     24 => 'Laravel\\Pail\\PailServiceProvider',
-    25 => 'Laravel\\Sail\\SailServiceProvider',
-    26 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    27 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    28 => 'Carbon\\Laravel\\ServiceProvider',
-    29 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    30 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    31 => 'Scalar\\ScalarServiceProvider',
+    25 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    26 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    27 => 'Carbon\\Laravel\\ServiceProvider',
+    28 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    29 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    30 => 'Scalar\\ScalarServiceProvider',
+    31 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
     32 => 'App\\Providers\\AppServiceProvider',
-    33 => 'App\\Providers\\ServicesProvider',
+    33 => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'eager' => 
   array (
@@ -55,7 +55,8 @@
     14 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     15 => 'Termwind\\Laravel\\TermwindServiceProvider',
     16 => 'Scalar\\ScalarServiceProvider',
-    17 => 'App\\Providers\\AppServiceProvider',
+    17 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+    18 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (
@@ -209,10 +210,15 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
-    'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
-    'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
-    'App\\Service\\Contracts\\UserService' => 'App\\Providers\\ServicesProvider',
+    'App\\Service\\Contracts\\UserService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Http\\Controllers\\UserController' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\CourseService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\LessonService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\PaymentService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\EnrollmentService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\LessonCompletionService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\RatingService' => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'when' => 
   array (
@@ -255,13 +261,10 @@
     'Illuminate\\Validation\\ValidationServiceProvider' => 
     array (
     ),
-    'Laravel\\Sail\\SailServiceProvider' => 
-    array (
-    ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
     array (
     ),
-    'App\\Providers\\ServicesProvider' => 
+    'App\\Providers\\ServicesLayerServiceProvider' => 
     array (
     ),
   ),

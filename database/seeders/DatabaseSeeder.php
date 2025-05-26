@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Lesson;
+use App\Models\LessonCompletion;
+use App\Models\Payment;
 use App\Models\Profile;
 use App\Models\Rating;
 use App\Models\User;
@@ -25,6 +27,8 @@ class DatabaseSeeder extends Seeder
             Lesson::factory(10)->create();
             Enrollment::factory(10)->create();
             Rating::factory(10)->create();
+            Payment::factory(10)->create();
+            LessonCompletion::factory(10)->create();
         } catch (\Exception $error) {
             echo $error->getMessage();
         }

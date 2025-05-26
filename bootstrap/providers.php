@@ -2,5 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\ServicesProvider::class,
+    App\Providers\ServicesLayerServiceProvider::class,
 ];

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->enum('status', ['active', 'completed'])->default('active');
+            $table->enum('status', ['active', 'completed', 'pending'])->default('pending');
             $table->foreignUlid('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->foreignUlid('student_id')->references('id')->on('users')->onDelete('cascade');
             $table->unique(['course_id', 'student_id']);

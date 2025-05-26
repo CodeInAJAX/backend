@@ -24,3 +24,10 @@ yarn-error.log
 .git
 commit.sh
 .scribe/*
+
+**/caddy
+frankenphp
+frankenphp-worker.php
+.env.pgsql
+.env.minio
+credentials.json
