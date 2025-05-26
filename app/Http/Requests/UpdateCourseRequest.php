@@ -61,6 +61,26 @@ class UpdateCourseRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'title.string' => 'Judul harus berupa teks.',
+            'title.min' => 'Judul minimal terdiri dari :min karakter.',
+            'title.max' => 'Judul maksimal terdiri dari :max karakter.',
+
+            'thumbnail.string' => 'Thumbnail harus berupa teks.',
+            'thumbnail.url' => 'Thumbnail harus berupa URL yang valid (http atau https).',
+
+            'description.string' => 'Deskripsi harus berupa teks.',
+
+            'price.integer' => 'Harga harus berupa angka.',
+
+            'currency.string' => 'Mata uang harus berupa teks.',
+        ];
+    }
+
+
+
     public function validationData(): array
     {
         return $this->only('title','thumbnail', 'description', 'price', 'currency');
