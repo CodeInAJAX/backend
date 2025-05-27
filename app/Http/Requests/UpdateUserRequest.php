@@ -40,10 +40,7 @@ class UpdateUserRequest extends FormRequest
             ],
             'email' => [
                 'sometimes',
-                Rule::email()
-                    ->rfcCompliant(strict: false)
-                    ->validateMxRecord()
-                    ->preventSpoofing(),
+                'email',
                 'unique:users,email'
             ],
             'password' => [
