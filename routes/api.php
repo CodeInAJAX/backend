@@ -24,8 +24,10 @@ $this->router->name('api.users.')->prefix('/v1/users')->controller(UserControlle
 
 $this->router->name('api.courses.')->prefix('/v1/courses')->controller(CourseController::class)->group(function () {
     $this->router->name('index')->get('/', 'index');
+    $this->router->name('search')->get('/search', 'search');
     $this->router->name('create')->post('/', 'store');
     $this->router->name('show')->get('/{id}', 'show');
+    $this->router->name('detail')->get('/{id}/detail', 'detail');
     $this->router->name('update')->patch('/{id}', 'update');
     $this->router->name('destroy')->delete('/{id}', 'destroy');
 });
