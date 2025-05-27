@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>CodeInAjax REST API</title>
+    <title>REST API CodeInAjax</title>
     <meta charset="utf-8"/>
     <meta
         name="viewport"
