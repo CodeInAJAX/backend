@@ -52,13 +52,24 @@ class UpdateLessonRequest extends FormRequest
                 'sometimes',
                 'integer',
             ],
-            'order_number' => [
-                'sometimes',
-                'integer'
-            ]
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'title.string' => 'Judul harus berupa teks.',
+            'title.max' => 'Judul maksimal :max karakter.',
+
+            'description.string' => 'Deskripsi harus berupa teks.',
+
+            'video_link.string' => 'Link video harus berupa teks.',
+            'video_link.url' => 'Link video harus berupa URL yang valid (http atau https).',
+
+            'duration.integer' => 'Durasi harus berupa angka.',
+
+        ];
+    }
     public function validationData(): array
     {
         return $this->only('title', 'description', 'video_link', 'duration', 'order_number');
