@@ -13,7 +13,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasRole(Role::ADMIN->value);
     }
 
     /**
@@ -50,7 +50,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->hasRole(Role::ADMIN->value);
+        return $user->hasRole(Role::ADMIN->value) && $user->id !== $model->id;
     }
 
     /**
@@ -58,7 +58,7 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return $user->hasRole(Role::ADMIN->value);
+        return $user->hasRole(Role::ADMIN->value) && $user->id !== $model->id;
     }
 
     /**
@@ -66,6 +66,6 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return $user->hasRole(Role::ADMIN->value);
+        return $user->hasRole(Role::ADMIN->value) && $user->id !== $model->id;
     }
 }
