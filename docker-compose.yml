@@ -16,7 +16,7 @@ services:
     postgresql:
         container_name: "postgresql"
         image: postgres:13-alpine
-        restart: always
+        restart: unless-stopped
         env_file:
             -   ./.env.pgsql
         networks:
@@ -30,12 +30,31 @@ services:
             interval: 10s
             timeout: 20s
             retries: 3
+
+    minio:
+        container_name: "minio"
+        image: "bitnami/minio:latest"
+        restart: unless-stopped
+        env_file:
+            -   ./.env.minio
+        volumes:
+            -   'minio_volume:/bitnami/minio/data'
+        ports:
+            -   '9000:9000'
+            -   '9001:9001'
+        networks:
+            - network_minio
+
 networks:
     network_postgresql:
         name: 'network_postgresql'
+    network_minio:
+        name: 'network_minio'
 #    network_laravel:
 #        name: 'network_laravel'
 
 volumes:
     postgresql_volume:
         name: 'postgresql_volume'
+    minio_volume:
+        name: 'minio_volume'
