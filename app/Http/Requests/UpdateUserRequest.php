@@ -69,6 +69,32 @@ class UpdateUserRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama maksimal :max karakter.',
+
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan.',
+
+            'password.string' => 'Kata sandi harus berupa teks.',
+            'password.min' => 'Kata sandi minimal :min karakter.',
+            'password.max' => 'Kata sandi maksimal :max karakter.',
+
+            'role.string' => 'Peran harus berupa teks.',
+            'role.Illuminate\Validation\Rules\Enum' => 'Peran yang dipilih tidak valid.',
+
+            'photo.string' => 'URL foto harus berupa teks.',
+            'photo.url' => 'URL foto harus berupa URL yang valid (http atau https).',
+
+            'gender.string' => 'Jenis kelamin harus berupa teks.',
+            'gender.Illuminate\Validation\Rules\Enum' => 'Jenis kelamin yang dipilih tidak valid.',
+
+            'about.string' => 'Tentang harus berupa teks.',
+        ];
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
