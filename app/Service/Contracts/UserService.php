@@ -4,7 +4,7 @@ namespace App\Service\Contracts;
 
 use App\Http\Requests\FilterUserByEmailRequest;
 use App\Http\Requests\LoginUserRequest;
-use App\Http\Requests\PaginationUserRequest;
+use App\Http\Requests\PaginationRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
@@ -16,7 +16,11 @@ use \Symfony\Component\HttpFoundation\Cookie;
 
 interface UserService
 {
-    public function getAll(PaginationUserRequest $data) :AnonymousResourceCollection;
+    public function getAll(PaginationRequest $data) :AnonymousResourceCollection;
+
+    public function getAllTrashed(PaginationRequest $data) :AnonymousResourceCollection;
+
+    public function showTrash(string $id) : UserResource;
 
     public function create(StoreUserRequest $data) : UserResource;
 
