@@ -22,7 +22,7 @@ class CourseResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $course = [
+        return [
             'id' => $this->id,
             'title' => $this->title,
             'thumbnail' => $this->thumbnail,
@@ -33,8 +33,7 @@ class CourseResource extends JsonResource
             'updatedAt' => $this->updated_at,
             'mentor' => new UserResource($this->whenLoaded('mentor')),
             'lessons' => LessonResource::collection($this->whenLoaded('lessons')),
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
-
-        return $course;
     }
 }
