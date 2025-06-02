@@ -23,6 +23,16 @@ class LessonResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            "id" => $this->id,
+            "title" => $this->title,
+            "description" => $this->description,
+            "videoLink" => $this->video_link,
+            "duration" => $this->duration,
+            "orderNumber" => $this->order_number,
+            "createdAt" => $this->created_at,
+            "updatedAt" => $this->updated_at,
+            "course" => new CourseResource($this->whenLoaded('course'))
+        ];
     }
 }
