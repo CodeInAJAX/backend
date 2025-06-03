@@ -40,7 +40,7 @@ trait HttpResponses
         $errorsResponse = [];
         foreach ($errors as $key => $value ) {
             $errorsResponse[] = [
-                'title' => 'Users Request Validation Failed',
+                'title' => 'Request Validation Failed',
                 'details' => $value,
                 'code' => 400,
                 'status' => 'STATUS_BAD_REQUEST',
