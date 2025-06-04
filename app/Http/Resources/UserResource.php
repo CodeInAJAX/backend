@@ -45,6 +45,8 @@ class UserResource extends JsonResource
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
             'courses' => CourseResource::collection($this->whenLoaded('courses')),
+            'enrolledCourses' => EnrollmentResource::collection($this->whenLoaded('enrolledCourses')),
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
     }
 }
