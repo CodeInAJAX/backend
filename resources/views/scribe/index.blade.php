@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>REST API CodeInAjax</title>
+    <title>RESTful API CodeInAJAX</title>
     <meta charset="utf-8"/>
     <meta
         name="viewport"
