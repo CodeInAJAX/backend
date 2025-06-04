@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json([
                         'errors' => [
                             'title' => 'Users Forbidden',
-                            'detail' => 'Your token must be refresh to perform this action.',
+                            'details' => 'Your token must be refresh to perform this action.',
                             'code' => Response::HTTP_FORBIDDEN,
                             'status' => 'STATUS_FORBIDDEN',
                         ]
@@ -36,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'errors' => [
                         'title' => 'Users Unauthorized',
-                        'detail' => 'You must authenticate to perform this action.',
+                        'details' => 'You must authenticate to perform this action.',
                         'code' => Response::HTTP_UNAUTHORIZED,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
