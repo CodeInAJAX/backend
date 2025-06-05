@@ -215,6 +215,8 @@
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
     'App\\Service\\Contracts\\UserService' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Http\\Controllers\\UserController' => 'App\\Providers\\ServicesLayerServiceProvider',
+    'App\\Service\\Contracts\\CourseService' => 'App\\Providers\\ServicesLayerServiceProvider',
   ),
   'when' => 
   array (
