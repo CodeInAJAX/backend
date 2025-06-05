@@ -6,6 +6,7 @@ use App\Http\Controllers\LessonCompletionController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 
 
@@ -69,4 +70,13 @@ $this->router->name('api.ratings.')->prefix('/v1/courses')->controller(RatingCon
     $this->router->name('show')->get('/{courseId}/ratings/{ratingId}', 'show');
     $this->router->name('update')->patch('/{courseId}/ratings/{ratingId}', 'update');
     $this->router->name('destroy')->delete('/{courseId}/ratings/{ratingId}', 'destroy');
+});
+
+$this->router->name('api.uploads.')->prefix('/v1/uploads')->controller(UploadController::class)->group(function () {
+    $this->router->name('profile')->post('/profile', 'storeProfilePhoto');
+    $this->router->name('thumbnail')->post('/thumbnail', 'storeCourseThumbnail');
+    $this->router->name('video')->post('/video', 'storeCourseVideo');
+    $this->router->name('destroy.profile')->delete('/profile', 'destroyProfilePhoto');
+    $this->router->name('destroy.thumbnail')->delete('/thumbnail', 'destroyCourseThumbnail');
+    $this->router->name('destroy.video')->delete('/video', 'destroyCourseVideo');
 });
