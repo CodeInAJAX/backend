@@ -54,6 +54,11 @@ class Course extends Model
             ->withPivot('rating', 'comment');
     }
 
+    public function payments() : HasMany
+    {
+        return $this->hasMany(Payment::class, 'course_id');
+    }
+
     protected static function boot() :void
     {
         parent::boot();
