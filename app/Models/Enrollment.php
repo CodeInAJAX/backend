@@ -24,7 +24,6 @@ class Enrollment extends Model
     protected $fillable = [
         'course_id',
         'student_id',
-        'enrolled_at',
         'status',
     ];
 
@@ -35,6 +34,9 @@ class Enrollment extends Model
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = (string) Str::ulid();
+            }
+            if (empty($model->status)) {
+                $model->status = Status::PENDING;
             }
         });
     }
