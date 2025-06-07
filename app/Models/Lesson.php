@@ -6,6 +6,7 @@ use Database\Factories\LessonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Lesson extends Model
@@ -33,6 +34,11 @@ class Lesson extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
+    public function lessonsCompletions() : HasMany
+    {
+        return $this->hasMany(LessonCompletion::class, 'lesson_id');
+
+    }
     protected static function boot() :void
     {
         parent::boot();
