@@ -6,6 +6,7 @@ use Database\Factories\LessonCompletionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class LessonCompletion extends Model
 {
@@ -23,7 +24,8 @@ class LessonCompletion extends Model
     protected $fillable = [
         'lesson_id',
         'student_id',
-        'watch_duration'
+        'watch_duration',
+        'completed_at',
     ];
 
     protected $casts = [
@@ -39,4 +41,15 @@ class LessonCompletion extends Model
     {
         return $this->belongsTo(User::class, 'student_id');
     }
+    protected static function boot() :void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::ulid();
+            }
+        });
+    }
+
 }
