@@ -21,7 +21,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        return $user->id === $model->id;
     }
 
     /**
@@ -40,10 +40,6 @@ class UserPolicy
         return $user->id === $model->id;
     }
 
-    public function detail(User $user, User $model) :bool
-    {
-        return $user->id === $model->id || $user->hasRole(Role::ADMIN->value);
-    }
 
     /**
      * Determine whether the user can delete the model.
