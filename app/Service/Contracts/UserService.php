@@ -31,6 +31,8 @@ interface UserService
 
     public function getByEmail(FilterUserByEmailRequest $data) : UserResource;
 
+    public function show() : UserResource;
+
     public function update(UpdateUserRequest $data) : UserResource;
     public function delete(string $id) : array;
 
