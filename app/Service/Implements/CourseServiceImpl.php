@@ -49,8 +49,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authentication process before getting all courses');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course List Failed',
-                        'details' => 'failed to get courses: the user not authenticated',
+                        'title' => 'Gagal mendapatkan daftar kursus',
+                        'details' => 'gagal mendapatkan daftar kursus karena user tidak terautentikasi',
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -66,7 +66,7 @@ class CourseServiceImpl implements CourseService
 
             // query courses with relations
             $courses = $this->course->newModelQuery()
-                ->withExists(['mentor', 'lessons'])
+                ->with(['mentor', 'lessons'])
                 ->paginate($size, ['*'], 'page', $page);
 
             $this->logger->info('successfully retrieved all courses', [
@@ -84,10 +84,15 @@ class CourseServiceImpl implements CourseService
             }
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Course List Failed',
-                    'details' => 'failed to get courses: ' . $exception->getMessage(),
+                    'title' => 'Gagal mendapatkan daftar kursus',
+                    'details' => 'gagal mendapatkan kursus karena kegagalan server, untuk selengkapnya di meta properti',
                     'code' => 500,
-                    'status' => 'INTERNAL_SERVER_ERROR'
+                    'status' => 'INTERNAL_SERVER_ERROR',
+                    'meta' => [
+                        'en' => [
+                            'error' =>  $exception->getMessage()
+                        ]
+                    ]
                 ]
             ]));
         }
@@ -103,8 +108,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authentication process before show the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Show Failed',
-                        'details' => 'failed to show course: the user not authenticated',
+                        'title' => 'Gagal mendapatkan daftar kursus',
+                        'details' => 'gagal mendapatkan kursus karena user tidak terautentikasi',
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -115,13 +120,13 @@ class CourseServiceImpl implements CourseService
             ]);
 
             // validate request
-            $course = $this->course->newModelQuery()->withExists(['mentor','lessons'])->find($id);
+            $course = $this->course->newModelQuery()->with(['mentor','lessons'])->find($id);
             if (!$course) {
                 $this->logger->error('failed to show the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Show Failed',
-                        'details' => 'failed to show course: the course not found',
+                        'title' => 'Gagal mendapatkan kursus',
+                        'details' => 'gagal mendapatkan kursus karena tidak ditemukan',
                         'code' => 404,
                         'status' => 'STATUS_NOT_FOUND'
                     ]
@@ -129,6 +134,7 @@ class CourseServiceImpl implements CourseService
             }
 
             $course->refresh();
+
             $this->logger->info('successfully show a course, then return course creation results');
 
             return new CourseResource($course);
@@ -136,8 +142,8 @@ class CourseServiceImpl implements CourseService
             $this->logger->error('failed to show the course: course not found ' . $exception->getMessage());
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Course Show Failed',
-                    'details' => 'course not found: ' . $exception->getMessage(),
+                    'title' => 'Gagal mendapatkan kursus',
+                    'details' => 'gagal mendapatkan kursus karena tidak ditemukan',
                     'code' => 404,
                     'status' => 'STATUS_NOT_FOUND'
                 ]
@@ -155,8 +161,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authentication process before creating the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Create Failed',
-                        'details' => 'failed to create course: the user not authenticated',
+                        'title' => 'Gagal membuat kursus',
+                        'details' => 'gagal membuat kursus karena user tidak terautentikasi',
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -173,8 +179,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authorization process before creating the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Create Failed',
-                        'details' => 'failed to create course: the user not unauthorized to this action',
+                        'title' => 'Gagal membuat kursus',
+                        'details' => 'gagal membuat kursus karena user tidak diizinkan untuk melakukan aksi ini',
                         'code' => 403,
                         'status' => 'STATUS_FORBIDDEN',
                     ]
@@ -198,10 +204,15 @@ class CourseServiceImpl implements CourseService
             $this->logger->error('failed to create the course: missing attribute: ' . $exception->getMessage());
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Course Create Failed',
-                    'details' => 'missing required attribute: ' . $exception->getMessage(),
+                    'title' => 'Gagal membuat kursus',
+                    'details' => 'atribut yang diperlukan hilang untuk detail nya di meta properti',
                     'code' => 400,
-                    'status' => 'STATUS_BAD_REQUEST'
+                    'status' => 'STATUS_BAD_REQUEST',
+                    'meta' => [
+                        'en' => [
+                            'error' => $exception->getMessage(),
+                        ]
+                    ]
                 ]
             ]));
         }
@@ -217,8 +228,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authentication process before updating the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Update Failed',
-                        'details' => 'failed to update course: the user not authenticated',
+                        'title' => 'Gagal memperbarui kursus',
+                        'details' => 'gagal memperbarui kursus karena user tidak terautentikasi',
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -234,8 +245,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed to update the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Update Failed',
-                        'details' => 'failed to update course: the course not found',
+                        'title' => 'Gagal memperbarui kursus',
+                        'details' => 'gagal memperbarui kursus karena kursus tidak ditemukan',
                         'code' => 404,
                         'status' => 'STATUS_NOT_FOUND'
                     ]
@@ -249,8 +260,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authorization process before updating the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Update Failed',
-                        'details' => 'failed to update course: the user not unauthorized to this action',
+                        'title' => 'Gagal memperbarui kursus',
+                        'details' => 'gagal memperbarui kursus karena user tidak diizinkan untuk melakukan aksi ini',
                         'code' => 403,
                         'status' => 'STATUS_FORBIDDEN',
                     ]
@@ -277,10 +288,15 @@ class CourseServiceImpl implements CourseService
             $this->logger->error('failed to update the course: missing attribute: ' . $exception->getMessage());
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Course Update Failed',
-                    'details' => 'missing required attribute: ' . $exception->getMessage(),
+                    'title' => 'Gagal memperbarui kursus',
+                    'details' => 'atribut yang diperlukan hilang untuk detail nya di meta properti',
                     'code' => 400,
-                    'status' => 'STATUS_BAD_REQUEST'
+                    'status' => 'STATUS_BAD_REQUEST',
+                    'meta' => [
+                        'en' => [
+                            'error' => $exception->getMessage(),
+                        ]
+                    ]
                 ]
             ]));
         }
@@ -295,8 +311,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authentication process before delete the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Delete Failed',
-                        'details' => 'failed to delete course: the user not authenticated',
+                        'title' => 'Gagal menghapus kursus',
+                        'details' => 'gagal menghapus kursus karena user tidak terautentikasi',
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -311,10 +327,12 @@ class CourseServiceImpl implements CourseService
             if (!$course) {
                 $this->logger->error('failed to delete the course: the course not found');
                 throw new HttpResponseException($this->errorResponse([
-                    'title' => 'Course Delete Failed',
-                    'details' => 'failed to delete course: the course not found',
-                    'code' => 404,
-                    'status' => 'STATUS_NOT_FOUND'
+                    [
+                        'title' => 'Gagal menghapus kursus',
+                        'details' => 'gagal menghapus kursus karena kursus tidak ditemukan',
+                        'code' => 404,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
                 ]));
             }
 
@@ -323,8 +341,8 @@ class CourseServiceImpl implements CourseService
                 $this->logger->error('failed the authorization process before delete the course');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Course Delete Failed',
-                        'details' => 'failed to update course: the user not unauthorized to this action',
+                        'title' => 'Gagal menghapus kursus',
+                        'details' => 'gagal menghapus kursus karena user tidak diizinkan untuk melakukan aksi ini',
                         'code' => 403,
                         'status' => 'STATUS_FORBIDDEN',
                     ]
@@ -333,11 +351,11 @@ class CourseServiceImpl implements CourseService
 
             $course->delete();
             $this->logger->info('successfully delete the course with id', [
-                'course_id' => $id,
+                'deleted_course_id' => $id,
                 'mentor_id' => $user->id
             ]);
             return [
-                'course_id' => $id,
+                'deleted_course_id' => $id,
                 'mentor_id' => $user->id
             ];
         } catch (\Exception $exception) {
@@ -347,10 +365,15 @@ class CourseServiceImpl implements CourseService
             }
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Course Delete Failed',
-                    'details' => 'failed to delete course: ' . $exception->getMessage(),
+                    'title' => 'Gagal menghapus daftar kursus',
+                    'details' => 'gagal menghapus kursus karena kegagalan server, untuk selengkapnya di meta properti',
                     'code' => 500,
-                    'status' => 'INTERNAL_SERVER_ERROR'
+                    'status' => 'INTERNAL_SERVER_ERROR',
+                    'meta' => [
+                        'en' => [
+                            'error' =>  $exception->getMessage()
+                        ]
+                    ]
                 ]
             ]));
         }
