@@ -72,11 +72,14 @@ class UserServiceImpl implements UserService
             $this->logger->info('successfully goes through all the subsequent processes returning the result');
             return UserResource::collection($users);
         } catch (\Exception $exception){
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed processing request for listing users',  [
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Get All By Pagination Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua user berdasarkan penomoran halaman'));
         }
     }
 
@@ -90,8 +93,8 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing request for listing trash user: User not authenticated');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Get All Trash User Failed',
-                        'details' => 'failed to listing trashed user: the user is not authenticated',
+                        'title' => 'Gagal mendapatkan semua user yang sudah di hapus',
+                        'details' => 'gagal mendapatkan daftar semua user yang sudah di hapus karena user tidak terautentikasi',
                         'code' => HttpResponse::HTTP_UNAUTHORIZED,
                         'status' => 'STATUS_UNAUTHORIZED'
                     ]
@@ -104,8 +107,8 @@ class UserServiceImpl implements UserService
                 ]);
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Get All Trash User Failed',
-                        'details' => 'failed to listing trashed user: the user is not authorized to perform this action',
+                        'title' => 'Gagal mendapatkan semua user yang sudah di hapus',
+                        'details' => 'gagal mendapatkan daftar semua user yang sudah di hapus karena user tidak diizinkan melakukan aksi ini',
                         'code' => HttpResponse::HTTP_FORBIDDEN,
                         'status' => 'STATUS_FORBIDDEN'
                     ]
@@ -129,11 +132,14 @@ class UserServiceImpl implements UserService
             $this->logger->info('successfully goes through all the subsequent processes returning the result');
             return UserResource::collection($users);
         } catch (\Exception $exception){
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed processing request for listing trashed users',  [
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'User Get All Trashed By Pagination Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan semua user yang sudah di hapus'));
         }
     }
 
@@ -170,10 +176,15 @@ class UserServiceImpl implements UserService
         } catch (MissingAttributeException $exception) {
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Create Failed',
-                    'details' => 'missing required attribute: ' . $exception->getMessage(),
-                    'code' => 400,
-                    'status' => 'STATUS_BAD_REQUEST'
+                    'title' => 'Gagal membuat user',
+                    'details' => 'atribut yang diperlukan hilang untuk detail nya di meta properti',
+                    'code' => HttpResponse::HTTP_BAD_REQUEST,
+                    'status' => 'STATUS_BAD_REQUEST',
+                    'meta' => [
+                        'en' => [
+                            'error' => $exception->getMessage()
+                        ]
+                    ]
                 ]
             ]));
         }
@@ -195,10 +206,25 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing request for update user: User not authenticated');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'User Update Failed',
-                        'details' => 'failed to update the user: the user is not authenticated',
+                        'title' => 'Gagal memperbarui user',
+                        'details' => 'gagal memperbarui user karena user tidak terautentikasi',
                         'code' => HttpResponse::HTTP_UNAUTHORIZED,
                         'status' => 'STATUS_UNAUTHORIZED'
+                    ]
+                ]));
+            }
+
+            // Check if user is authorized to update
+            if (!$this->gate->allows('update', $user)) {
+                $this->logger->error('failed processing request for update user: Not authorized', [
+                    'user_id' => $user->id
+                ]);
+                throw new HttpResponseException($this->errorResponse([
+                    [
+                        'title' => 'Gagal memperbarui user',
+                        'details' => 'gagal memperbarui user karena user tidak diizinkan melakukan aksi ini',
+                        'code' => HttpResponse::HTTP_FORBIDDEN,
+                        'status' => 'STATUS_FORBIDDEN'
                     ]
                 ]));
             }
@@ -208,21 +234,6 @@ class UserServiceImpl implements UserService
                 'user_id' => $user->id,
                 'fields' => array_keys($validated)
             ]);
-
-            // Check if user is authorized to update
-            if (!$this->gate->authorize('update', $user)) {
-                $this->logger->error('failed processing request for update user: Not authorized', [
-                    'user_id' => $user->id
-                ]);
-                throw new HttpResponseException($this->errorResponse([
-                    [
-                        'title' => 'User Update Failed',
-                        'details' => 'failed to update the user: the user is not authorized to perform this action',
-                        'code' => HttpResponse::HTTP_UNAUTHORIZED,
-                        'status' => 'STATUS_UNAUTHORIZED'
-                    ]
-                ]));
-            }
 
             $this->logger->info('successfully passed authorization, proceeding with update');
             $updatedFields = [];
@@ -237,8 +248,8 @@ class UserServiceImpl implements UserService
                     ]);
                     throw new HttpResponseException($this->errorResponse([
                         [
-                            'title' => 'User Update Failed',
-                            'details' => 'failed to update the user, because the email user is already in use',
+                            'title' => 'Gagal memperbarui user',
+                            'details' => 'gagal memperbarui user karena data email user yang diperbarui sudah digunakan',
                             'code' => HttpResponse::HTTP_CONFLICT,
                             'status' => 'STATUS_CONFLICT'
                         ]
@@ -307,18 +318,21 @@ class UserServiceImpl implements UserService
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Update Failed',
-                    'details' => 'user cannot be found, you must be registered',
+                    'title' => 'Gagal memperbarui user',
+                    'details' => 'gagal memperbarui user karena user tidak ditemukan',
                     'code' => HttpResponse::HTTP_NOT_FOUND,
                     'status' => 'STATUS_NOT_FOUND',
                 ]
             ]));
         } catch (\Exception $exception) {
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('Failed processing update user: Unexpected error', [
                 'error' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString()
             ]);
-            throw new HttpResponseException($this->errorInternalToResponse($exception,'User Update Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception,'Gagal memperbarui user'));
         }
     }
 
@@ -337,8 +351,8 @@ class UserServiceImpl implements UserService
             $this->logger->error('Delete user failed: User not authenticated');
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Delete Failed',
-                    'details' => 'failed to delete the user: the user is not authenticated',
+                    'title' => 'Gagal menghapus user',
+                    'details' => 'gagal menghapus user karena user tidak terautentikasi',
                     'code' => HttpResponse::HTTP_UNAUTHORIZED,
                     'status' => 'STATUS_UNAUTHORIZED'
                 ]
@@ -353,8 +367,8 @@ class UserServiceImpl implements UserService
             throw new HttpResponseException(
                 $this->errorResponse([
                     [
-                        'title' => 'User Delete Failed',
-                        'details' => 'failed to delete the user: the user to delete not found',
+                        'title' => 'Gagal menghapus user',
+                        'details' => 'gagal menghapus user karena user yang akan dihapus tidak ditemukan',
                         'code' => HttpResponse::HTTP_NOT_FOUND,
                         'status' => 'STATUS_NOT_FOUND'
                     ]
@@ -370,8 +384,8 @@ class UserServiceImpl implements UserService
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Delete Failed',
-                    'details' => 'failed to delete the user: the user is not authorized to perform this action',
+                    'title' => 'Gagal menghapus user',
+                    'details' => 'gagal menghapus user karena user tidak diizinkan melakukan aksi ini',
                     'code' => HttpResponse::HTTP_FORBIDDEN,
                     'status' => 'STATUS_FORBIDDEN'
                 ]
@@ -408,8 +422,8 @@ class UserServiceImpl implements UserService
             $this->logger->error('Restore user failed: User not authenticated');
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Restore Failed',
-                    'details' => 'failed to restore the user: the user is not authenticated',
+                    'title' => 'Gagal mengambalikan user yang terhapus',
+                    'details' => 'gagal mengambalikan user yang terhapus, karena user tidak terautentikasi',
                     'code' => HttpResponse::HTTP_UNAUTHORIZED,
                     'status' => 'STATUS_UNAUTHORIZED'
                 ]
@@ -424,8 +438,8 @@ class UserServiceImpl implements UserService
             throw new HttpResponseException(
                 $this->errorResponse([
                     [
-                        'title' => 'User Restore Failed',
-                        'details' => 'failed to restore the user: the user to restore not found',
+                        'title' => 'Gagal mengembalikan user yang terhapus',
+                        'details' => 'gagal mengembalikan user yang terhapus, karena user yang dikembalikan tidak ditemukan',
                         'code' => HttpResponse::HTTP_NOT_FOUND,
                         'status' => 'STATUS_NOT_FOUND'
                     ]
@@ -441,8 +455,8 @@ class UserServiceImpl implements UserService
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Restore Failed',
-                    'details' => 'failed to restore the user: the user is not authorized to perform this action',
+                    'title' => 'Gagal mengembalikan user terhapus',
+                    'details' => 'gagal mengembalikan user terhapus karena user tidak diizinkan melakukan aksi ini',
                     'code' => HttpResponse::HTTP_FORBIDDEN,
                     'status' => 'STATUS_FORBIDDEN'
                 ]
@@ -478,8 +492,8 @@ class UserServiceImpl implements UserService
         if (!$accessToken) {
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Failed logged in User',
-                    'details' => 'Invalid login credentials, email or password is incorrect',
+                    'title' => 'Gagal login user',
+                    'details' => 'gagal login user karena tidak valid kredensial user, mungkin email atau password yang salah ',
                     'code' => 401,
                     'status' => 'STATUS_UNAUTHORIZED',
                     'meta' => [
@@ -499,8 +513,8 @@ class UserServiceImpl implements UserService
         if (!$refreshToken) {
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'Failed logged in User',
-                    'details' => 'Invalid login credentials, email or password is incorrect',
+                    'title' => 'Gagal login user',
+                    'details' => 'gagal login user karena tidak valid kredensial user, mungkin email atau password yang salah ',
                     'code' => 401,
                     'status' => 'STATUS_UNAUTHORIZED',
                     'meta' => [
@@ -559,7 +573,78 @@ class UserServiceImpl implements UserService
         $user = $this->user->newQuery()
             ->with('profile')
             ->where('email', $data->route('email'))
-            ->firstOrFail();
+            ->first();
+
+        if (!$user) {
+            $this->logger->error('Get User By Email Failed: User not found', ['user_email' => $data->route('email')]);
+            throw new HttpResponseException(
+                $this->errorResponse([
+                    [
+                        'title' => 'Gagal menemukan user berdasarkan Email',
+                        'details' => 'gagal menemukan user berdasarkan email, karena user yang dikembalikan tidak ditemukan',
+                        'code' => HttpResponse::HTTP_NOT_FOUND,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
+                ])
+            );
+        }
+
+        $this->logger->info('successfully goes through all the subsequent processes returning the result');
+
+        return new UserResource($user);
+    }
+
+
+    public function show(): UserResource
+    {
+        $this->logger->info('starting the process of get detail user by id');
+        // Get the user from auth
+        $user = $this->authGuard->user();
+        if (!$user) {
+            $this->logger->error('failed processing request for get detail user by id: User not authenticated');
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Gagal mendapatkan detail user',
+                    'details' => 'gagal mendapatkan detail user karena user tidak terautentikasi',
+                    'code' => HttpResponse::HTTP_UNAUTHORIZED,
+                    'status' => 'STATUS_UNAUTHORIZED'
+                ]
+            ]));
+        }
+
+        // Check if user is authorized to view
+        if (!$this->gate->allows('view', $user)) {
+            $this->logger->error('failed processing request for update user: Not authorized', [
+                'user_id' => $user->id
+            ]);
+            throw new HttpResponseException($this->errorResponse([
+                [
+                    'title' => 'Gagal memperbarui user',
+                    'details' => 'gagal memperbarui user karena user tidak diizinkan melakukan aksi ini',
+                    'code' => HttpResponse::HTTP_FORBIDDEN,
+                    'status' => 'STATUS_FORBIDDEN'
+                ]
+            ]));
+        }
+        $this->logger->info('starts the process of getting a detail user');
+
+        $user = $this->user->newQuery()
+            ->with(['profile','courses.payments','enrolledCourses', 'payments'])
+            ->find($user->id);
+
+        if (!$user) {
+            $this->logger->error('Get Detail User Failed: User not found', ['user_id' => $user->id ]);
+            throw new HttpResponseException(
+                $this->errorResponse([
+                    [
+                        'title' => 'Gagal menemukan detail user',
+                        'details' => 'gagal menemukan detail user, karena user yang dikembalikan tidak ditemukan',
+                        'code' => HttpResponse::HTTP_NOT_FOUND,
+                        'status' => 'STATUS_NOT_FOUND'
+                    ]
+                ])
+            );
+        }
 
         $this->logger->info('successfully goes through all the subsequent processes returning the result');
 
@@ -578,8 +663,8 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing refresh token because refresh token is missing');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'User Refresh Token Failed',
-                        'details' => 'refresh token value not provided in cookie',
+                        'title' => 'Gagal menyegarkan token',
+                        'details' => "gagal menyegarkan token, karena nilai 'refresh_token' tidak tersedia di cookie",
                         'code' => 400,
                         'status' => 'STATUS_BAD_REQUEST',
                     ]
@@ -593,8 +678,8 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing refresh token because invalid refresh token');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'User Refresh Token Failed',
-                        'details' => 'invalid credentials refresh token value',
+                        'title' => 'Gagal menyegarkan token',
+                        'details' => "gagal menyegarkan token karena tidak valid isi data 'refresh_token'",
                         'code' => 401,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
@@ -621,8 +706,8 @@ class UserServiceImpl implements UserService
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'user cannot be found, you must be registered',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => 'user yang akan disegarkan token tidak ditemukan, sebaiknya melakukan daftar akun dahulu',
                     'code' => HttpResponse::HTTP_NOT_FOUND,
                     'status' => 'STATUS_NOT_FOUND',
                 ]
@@ -633,8 +718,8 @@ class UserServiceImpl implements UserService
             ]);
             throw new HttpResponseException($this->errorResponse([
                 [
-                    'title' => 'User Refresh Token Failed',
-                    'details' => 'Your refresh token must be no expired to perform this action. You can update the refresh token by login again',
+                    'title' => 'Gagal menyegarkan token',
+                    'details' => "'refresh_token' sudah kadaluarsa, anda dapat mendapatkan nya kembali setelah melakukan login ulang",
                     'code' => HttpResponse::HTTP_FORBIDDEN,
                     'status' => 'STATUS_FORBIDDEN',
                 ]
@@ -651,8 +736,8 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing request for listing trash user: User not authenticated');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Get User Trashed Failed',
-                        'details' => 'failed to get trashed user: the user is not authenticated',
+                        'title' => 'Mendapatkan user yang terhapus berdasarkan id',
+                        'details' => 'gagal mendapatkan user yang terhapus karena user tidak ditemukan',
                         'code' => HttpResponse::HTTP_UNAUTHORIZED,
                         'status' => 'STATUS_UNAUTHORIZED'
                     ]
@@ -665,8 +750,8 @@ class UserServiceImpl implements UserService
                 ]);
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Get User Trashed Failed',
-                        'details' => 'failed to get trashed user: the user is not authorized to perform this action',
+                        'title' => 'Mendapatkan user yang terhapus berdasarkan id',
+                        'details' => 'gagal mendapatkan user yang terhapus, karena user tidak diizinkan melakukan aksi ini',
                         'code' => HttpResponse::HTTP_FORBIDDEN,
                         'status' => 'STATUS_FORBIDDEN'
                     ]
@@ -678,8 +763,8 @@ class UserServiceImpl implements UserService
                 $this->logger->error('failed processing request for get trash user: User not found');
                 throw new HttpResponseException($this->errorResponse([
                     [
-                        'title' => 'Get User Trashed Failed',
-                        'details' => 'failed to get trashed user: the user is not found on trashed',
+                        'title' => 'Mendapatkan user yang terhapus berdasarkan id',
+                        'details' => 'gagal mendapatkan user yang terhapus karena user tidak ditemukan didaftar user terhapus',
                         'code' => HttpResponse::HTTP_NOT_FOUND,
                         'status' => 'STATUS_NOT_FOUND'
                     ]
@@ -691,11 +776,14 @@ class UserServiceImpl implements UserService
             $this->logger->info('successfully goes through all the subsequent processes returning the result');
             return new UserResource($user);
         } catch (\Exception $exception){
+            if ( $exception instanceof HttpResponseException ) {
+                throw $exception;
+            }
             $this->logger->error('failed processing request for get trashed users',  [
                 'error' => $exception->getMessage()
             ]);
 
-            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Get User Trashed By ID Failed'));
+            throw new HttpResponseException($this->errorInternalToResponse($exception, 'Gagal mendapatkan user yang terhapus berdasarkan id'));
         }
     }
 
