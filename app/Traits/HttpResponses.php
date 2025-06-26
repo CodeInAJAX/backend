@@ -40,7 +40,7 @@ trait HttpResponses
         $errorsResponse = [];
         foreach ($errors as $key => $value ) {
             $errorsResponse[] = [
-                'title' => 'Request Validation Failed',
+                'title' => 'Gagal mengvalidasi permintaan',
                 'details' => $value,
                 'code' => 400,
                 'status' => 'STATUS_BAD_REQUEST',
@@ -56,9 +56,14 @@ trait HttpResponses
         return $this->errorResponse([
             [
                 'title' => $title,
-                'details' => $exception->getMessage(),
+                'details' => 'Ada kesalahan dalam server, untuk detail kesalahan di meta properti',
                 'code' => 500,
-                'status' => 'STATUS_INTERNAL_SERVER_ERROR'
+                'status' => 'STATUS_INTERNAL_SERVER_ERROR',
+                'meta' => [
+                    'en' => [
+                        'error' => $exception->getMessage(),
+                    ]
+                ]
             ]
         ]);
     }
