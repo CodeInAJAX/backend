@@ -26,8 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($e instanceof TokenExpiredException) {
                     return response()->json([
                         'errors' => [
-                            'title' => 'Users Forbidden',
-                            'details' => 'Your token must be refresh to perform this action.',
+                            'title' => 'User dilarang untuk melakukan aksi ini',
+                            'details' => 'Token anda kadaluarsa silahkan diperbarui lagi',
                             'code' => Response::HTTP_FORBIDDEN,
                             'status' => 'STATUS_FORBIDDEN',
                         ]
@@ -35,8 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
                 return response()->json([
                     'errors' => [
-                        'title' => 'Users Unauthorized',
-                        'details' => 'You must authenticate to perform this action.',
+                        'title' => 'User tidak terautentikasi',
+                        'details' => 'Kamu harus terautentikasi untuk melakukan aksi ini',
                         'code' => Response::HTTP_UNAUTHORIZED,
                         'status' => 'STATUS_UNAUTHORIZED',
                     ]
