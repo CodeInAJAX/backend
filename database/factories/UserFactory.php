@@ -37,6 +37,7 @@ class UserFactory extends Factory
             'role' => $this->faker->randomElement([Role::STUDENT, Role::ADMIN, Role::MENTOR]),
             'created_at' => now(),
             'updated_at' => now(),
+
         ];
     }
 
