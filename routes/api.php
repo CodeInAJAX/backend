@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 
 
@@ -12,6 +15,7 @@ $this->router->name('api.users.')->prefix('/v1/users')->controller(UserControlle
     $this->router->name('create')->post('/', 'store');
     $this->router->name('login')->post('/login', 'login');
     $this->router->name('logout')->delete('/logout', 'logout');
+    $this->router->name('detail')->get('/detail', 'detail');
     $this->router->name('show')->get('/{email}', 'show');
     $this->router->name('update')->patch('/', 'update');
     $this->router->name('destroy')->delete('/{id}', 'destroy');
@@ -23,5 +27,27 @@ $this->router->name('api.courses.')->prefix('/v1/courses')->controller(CourseCon
     $this->router->name('create')->post('/', 'store');
     $this->router->name('show')->get('/{id}', 'show');
     $this->router->name('update')->patch('/{id}', 'update');
+    $this->router->name('destroy')->delete('/{id}', 'destroy');
+});
+
+$this->router->name('api.lessons.')->prefix('/v1/courses')->controller(LessonController::class)->group(function () {
+    $this->router->name('index')->get('/{courseId}/lessons', 'index');
+    $this->router->name('create')->post('/{courseId}/lessons', 'store');
+    $this->router->name('show')->get('/{courseId}/lessons/{lessonId}', 'show');
+    $this->router->name('update')->patch('/{courseId}/lessons/{lessonId}', 'update');
+    $this->router->name('destroy')->delete('/{courseId}/lessons/{lessonId}', 'destroy');
+});
+
+$this->router->name('api.payments.')->prefix('/v1/payments')->controller(PaymentController::class)->group(function () {
+    $this->router->name('index')->get('/', 'index');
+    $this->router->name('create')->post('/', 'store');
+    $this->router->name('show')->get('/{id}', 'show');
+    $this->router->name('update')->patch('/{id}', 'update');
+    $this->router->name('destroy')->delete('/{id}', 'destroy');
+});
+
+$this->router->name('api.enrollments')->prefix('/v1/enrollments')->controller(EnrollmentController::class)->group(function () {
+    $this->router->name('index')->get('/', 'index');
+    $this->router->name('show')->get('/{id}', 'show');
     $this->router->name('destroy')->delete('/{id}', 'destroy');
 });
